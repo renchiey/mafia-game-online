@@ -1,0 +1,43 @@
+.landing-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.landing-title {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.landing-button {
+  border-style: none;
+  background-color: transparent;
+  font-size: 24px;
+
+  border: 1px solid;
+  border-radius: 10px;
+  width: 200px;
+  height: 50px;
+  margin-top: 30px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.landing-button:hover {
+  background-color: blue;
+}
+
+.landing-game-code-text-field {
+  height: 50px;
+  font-size: 36px;
+  width: 180px;
+  text-align: center;
+}
+
+.landing-game-code-header {
+  font-size: 24px;
+  margin-bottom: 10px;
+}

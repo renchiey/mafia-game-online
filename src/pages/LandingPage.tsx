@@ -1,9 +1,9 @@
 import { useState } from "react";
 import "./styles.css";
-import JoinGame from "./JoinGame";
-import CreateGame from "./CreateGame";
+import JoinGame from "./Landing/JoinGame";
+import CreateGame from "./Landing/CreateGame";
 
-export function Landing() {
+export function LandingPage() {
   const [joinGameSelected, setJoinGameSelected] = useState(false);
   const [createGameSelected, setCreateGameSelected] = useState(false);
 

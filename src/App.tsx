@@ -1,20 +1,20 @@
 import { useLocation } from "react-router";
 import "./App.css";
-import { Landing } from "./screens/Landing/Landing";
+import { LandingPage } from "./pages/LandingPage";
 import { ReactNode, useEffect, useState } from "react";
-import Game from "./screens/Game/Game";
+import { GamePage } from "./pages/GamePage";
 
 function App() {
   let location = useLocation();
-  const [screen, setScreen] = useState<ReactNode>(<Landing />);
+  const [screen, setScreen] = useState<ReactNode>(<></>);
 
   useEffect(() => {
     const searchParams = location.search.split("?");
 
     if (searchParams.length === 1) {
-      setScreen(<Landing />);
+      setScreen(<LandingPage />);
     } else {
-      setScreen(<Game gameCode={searchParams[1]} />);
+      setScreen(<GamePage gameCode={searchParams[1]} />);
     }
   }, [location]);
 

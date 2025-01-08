@@ -2,6 +2,6 @@ interface GameProps {
   gameCode: string;
 }
 
-export default function Game({ gameCode }: GameProps) {
+export function GamePage({ gameCode }: GameProps) {
   return <div>HELLO {gameCode}</div>;
 }

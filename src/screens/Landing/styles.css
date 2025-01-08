@@ -30,14 +30,25 @@
   background-color: blue;
 }
 
-.landing-game-code-text-field {
-  height: 50px;
-  font-size: 36px;
+.landing-gc-text-field,
+.landing-un-text-field {
+  height: 40px;
   width: 180px;
   text-align: center;
 }
+.landing-gc-text-field {
+  font-size: 36px;
+}
 
-.landing-game-code-header {
+.landing-un-text-field {
+  font-size: 24px;
+}
+
+h3 {
   font-size: 24px;
   margin-bottom: 10px;
+}
+
+.landing-input-feedback {
+  height: 16px;
 }

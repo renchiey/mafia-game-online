@@ -6,10 +6,11 @@ import { GamePage } from "./pages/GamePage";
 
 function App() {
   let location = useLocation();
-  const [screen, setScreen] = useState<ReactNode>(<></>);
+  const [screen, setScreen] = useState<ReactNode>(<LandingPage />);
 
   useEffect(() => {
     const searchParams = location.search.split("?");
+    console.log(searchParams);
 
     if (searchParams.length === 1) {
       setScreen(<LandingPage />);

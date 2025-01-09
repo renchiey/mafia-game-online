@@ -106,8 +106,10 @@ h3 {
 }
 
 .lobby-roles-container {
-  width: 50%;
-  max-width: 500px;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .lobby-roles-container h3 {
@@ -120,6 +122,7 @@ h3 {
   justify-content: center;
   flex-wrap: wrap;
   gap: 10px;
+  border: 1px solid black;
 }
 
 .role-item {
@@ -129,9 +132,70 @@ h3 {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+}
+
+.role-remove {
+  position: absolute;
+  right: 0;
+  top: 0;
+  cursor: pointer;
+  visibility: hidden;
+}
+
+.role-item:hover > .role-remove {
+  visibility: visible;
 }
 
 .role-item img {
-  height: 75px;
-  width: 75px;
+  height: 50px;
+  width: 50px;
+}
+
+.role-item-name {
+  font-size: 18px;
+}
+
+.role-item-allegiance {
+  margin-top: -10px;
+  font-size: 14px;
+}
+
+.role-mafia {
+  color: red;
+}
+
+.role-town {
+  color: green;
+}
+
+.role-neutral {
+  color: gray;
+}
+
+.lobby-roles-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  position: relative;
+}
+
+.lobby-roles-add-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.player-list-item {
+  position: relative;
+  display: flex;
+  width: 150px;
+}
+
+.player-list-settings {
+  all: unset;
+  position: absolute;
+  right: 5px;
+  cursor: pointer;
 }

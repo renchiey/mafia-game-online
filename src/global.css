@@ -257,3 +257,61 @@ h3 {
   text-align: center;
   border-radius: 20px;
 }
+
+/** Role Modal */
+.role-modal-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border: 1px solid black;
+  padding: 20px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 200px;
+}
+
+.role-modal-container h3 {
+  position: relative;
+}
+
+.modal-close-icon {
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+}
+
+.role-modal-content h4 {
+  font-size: 18px;
+}
+
+.role-modal-content ul {
+  list-style: none;
+}
+
+.role-modal-content ul li {
+  border: 2px solid transparent;
+  border-radius: 15px;
+  padding: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.role-add-icon {
+  position: absolute;
+  right: 10px;
+  visibility: hidden;
+}
+
+.role-modal-content ul li:hover {
+  border-color: rgb(0, 0, 0, 0.5);
+}
+
+.role-modal-content ul li:hover > .role-add-icon {
+  visibility: visible;
+}

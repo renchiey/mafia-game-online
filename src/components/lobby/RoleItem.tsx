@@ -3,9 +3,10 @@ import { GameAllegiance, GameRole } from "../../utils/types";
 
 interface RoleItemProps {
   role: GameRole;
+  onRemove: () => void;
 }
 
-export const RoleItem = ({ role }: RoleItemProps) => {
+export const RoleItem = ({ role, onRemove }: RoleItemProps) => {
   const { iconSrc, name, description, allegiance } = role;
 
   const displayAllegiance = () => {
@@ -23,7 +24,7 @@ export const RoleItem = ({ role }: RoleItemProps) => {
 
   return (
     <div className="role-item">
-      <div className="role-remove">
+      <div className="role-remove" onClick={onRemove}>
         <HiOutlineX size={20} color="red" />
       </div>
       <img src={iconSrc} />

@@ -3,6 +3,8 @@ import { RolesList } from "../components/lobby/RoleList";
 import { PlayerList } from "../components/lobby/PlayerList";
 import { useNavigate } from "react-router";
 import { LeaveModal } from "../components/lobby/LeaveModal";
+import { RolesModal } from "../components/lobby/RolesModal";
+import { GameRole } from "../utils/types";
 
 interface GameProps {
   gameCode: string;
@@ -12,11 +14,14 @@ export function GamePage({ gameCode }: GameProps) {
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [state, setState] = useState<ReactNode>(<></>);
 
+  // TEMPORARY
+  const numPlayers = 5;
+
   useEffect(() => {
     if (gameStarted) {
       setState(<>poop</>);
     } else {
-      setState(<Lobby gameCode={gameCode} onClickCallback={() => setGameStarted(true)} />);
+      setState(<Lobby gameCode={gameCode} onClickCallback={() => setGameStarted(true)} numPlayers={numPlayers} />);
     }
   }, [gameStarted]);
 
@@ -26,9 +31,10 @@ export function GamePage({ gameCode }: GameProps) {
 interface LobbyProps {
   gameCode: string;
   onClickCallback: () => void;
+  numPlayers: number;
 }
 
-const Lobby = ({ gameCode, onClickCallback }: LobbyProps) => {
+const Lobby = ({ gameCode, onClickCallback, numPlayers }: LobbyProps) => {
   const [hintText, setHintText] = useState<string>("");
   const [showLeaveModal, setShowLeaveModal] = useState<boolean>(false);
 
@@ -54,7 +60,7 @@ const Lobby = ({ gameCode, onClickCallback }: LobbyProps) => {
       </div>
       <div className="lobby-main-container">
         <PlayerList />
-        <RolesList />
+        <RolesList numPlayers={numPlayers} />
       </div>
 
       <div className="lobby-footer-container">

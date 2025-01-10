@@ -13,7 +13,7 @@ export function PlayerList() {
       <h3>Players</h3>
       <ul className="lobby-players-list">
         {playerList.map((player) => (
-          <Player username={player} displaySettings={true} />
+          <Player username={player} displaySettings={true} key={crypto.randomUUID()} />
         ))}
       </ul>
     </div>

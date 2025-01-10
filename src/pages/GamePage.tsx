@@ -3,8 +3,6 @@ import { RolesList } from "../components/lobby/RoleList";
 import { PlayerList } from "../components/lobby/PlayerList";
 import { useNavigate } from "react-router";
 import { LeaveModal } from "../components/lobby/LeaveModal";
-import { RolesModal } from "../components/lobby/RolesModal";
-import { GameRole } from "../utils/types";
 
 interface GameProps {
   gameCode: string;

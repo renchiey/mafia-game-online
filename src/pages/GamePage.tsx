@@ -1,6 +1,8 @@
 import { ReactNode, useEffect, useState } from "react";
 import { RolesList } from "../components/lobby/RoleList";
 import { PlayerList } from "../components/lobby/PlayerList";
+import { useNavigate } from "react-router";
+import { LeaveModal } from "../components/lobby/LeaveModal";
 
 interface GameProps {
   gameCode: string;
@@ -14,12 +16,7 @@ export function GamePage({ gameCode }: GameProps) {
     if (gameStarted) {
       setState(<>poop</>);
     } else {
-      setState(
-        <Lobby
-          gameCode={gameCode}
-          onClickCallback={() => setGameStarted(true)}
-        />
-      );
+      setState(<Lobby gameCode={gameCode} onClickCallback={() => setGameStarted(true)} />);
     }
   }, [gameStarted]);
 
@@ -33,6 +30,9 @@ interface LobbyProps {
 
 const Lobby = ({ gameCode, onClickCallback }: LobbyProps) => {
   const [hintText, setHintText] = useState<string>("");
+  const [showLeaveModal, setShowLeaveModal] = useState<boolean>(false);
+
+  let navigate = useNavigate();
 
   const copyCode = () => {
     navigator.clipboard.writeText(gameCode);
@@ -57,7 +57,15 @@ const Lobby = ({ gameCode, onClickCallback }: LobbyProps) => {
         <RolesList />
       </div>
 
-      <button onClick={onClickCallback}>Start Game</button>
+      <div className="lobby-footer-container">
+        <button className="lobby-btn" onClick={() => setShowLeaveModal(true)}>
+          Leave Lobby
+        </button>
+        <button className="lobby-btn" onClick={onClickCallback}>
+          Start Game
+        </button>
+        {showLeaveModal && <LeaveModal onLeave={() => navigate("/")} onCancel={() => setShowLeaveModal(false)} />}
+      </div>
     </div>
   );
 };

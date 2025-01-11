@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { validateSessionId } from "../utils/helper";
 import { useNavigate } from "react-router";
+import { PlayerState, PlayerStatus } from "../utils/types";
 enum LandingState {
   JOIN,
   CREATE,
@@ -13,16 +14,26 @@ export function LandingPage() {
   const currentState = () => {
     switch (state) {
       case LandingState.JOIN:
-        return <JoinGame returnCallback={() => setState(LandingState.DEFAULT)} />;
+        return (
+          <JoinGame returnCallback={() => setState(LandingState.DEFAULT)} />
+        );
       case LandingState.CREATE:
-        return <CreateGame returnCallback={() => setState(LandingState.DEFAULT)} />;
+        return (
+          <CreateGame returnCallback={() => setState(LandingState.DEFAULT)} />
+        );
       case LandingState.DEFAULT:
         return (
           <>
-            <button className="landing-button" onClick={() => setState(LandingState.JOIN)}>
+            <button
+              className="landing-button"
+              onClick={() => setState(LandingState.JOIN)}
+            >
               join game
             </button>
-            <button className="landing-button" onClick={() => setState(LandingState.CREATE)}>
+            <button
+              className="landing-button"
+              onClick={() => setState(LandingState.CREATE)}
+            >
               create game
             </button>
           </>
@@ -62,7 +73,13 @@ const JoinGame = ({ returnCallback }: JoinGameProps) => {
   return (
     <>
       <h3>Enter Game Code</h3>
-      <input type="text" className="landing-gc-text-field" placeholder="00000" maxLength={5} onChange={(e) => setGameCode(e.target.value)} />
+      <input
+        type="text"
+        className="landing-gc-text-field"
+        placeholder="00000"
+        maxLength={5}
+        onChange={(e) => setGameCode(e.target.value)}
+      />
       <div className="landing-input-feedback">{feedbackText}</div>
       <button className="landing-button" onClick={() => handleJoinClick()}>
         join
@@ -83,6 +100,8 @@ const CreateGame = ({ returnCallback }: CreateGameProps) => {
   const [feedbackText, setFeedbackText] = useState<string>("");
   let navigate = useNavigate();
 
+  const tempID = "12345";
+
   const handleCreateClick = () => {
     if (username.length === 0) {
       setFeedbackText("Please enter a username first.");
@@ -93,13 +112,20 @@ const CreateGame = ({ returnCallback }: CreateGameProps) => {
 
       return;
     }
-    navigate(`/?${12345}`);
+    navigate(`/?${tempID}`, { state: { id: tempID, player: username } });
   };
 
   return (
     <>
       <h3>Enter username</h3>
-      <input type="text" className="landing-un-text-field" placeholder="name" maxLength={12} autoComplete="off" onChange={(e) => setUsername(e.target.value)} />
+      <input
+        type="text"
+        className="landing-un-text-field"
+        placeholder="name"
+        maxLength={12}
+        autoComplete="off"
+        onChange={(e) => setUsername(e.target.value)}
+      />
       <div className="landing-input-feedback">{feedbackText}</div>
       <button className="landing-button" onClick={() => handleCreateClick()}>
         Create

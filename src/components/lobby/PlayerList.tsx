@@ -1,11 +1,47 @@
 import { useEffect, useState } from "react";
 import { Player } from "./Player";
+import { PlayerState, PlayerStatus } from "../../utils/types";
 
-export function PlayerList() {
-  const [playerList, setPlayerList] = useState<string[]>([]);
+interface PlayerListProps {
+  players: PlayerState[]; // TEMPORARY
+}
+
+export function PlayerList({ players }: PlayerListProps) {
+  const [playerList, setPlayerList] = useState<PlayerState[]>([]);
 
   useEffect(() => {
-    setPlayerList(["player 1", "player 2", "player 3"]);
+    const p1: PlayerState = {
+      username: "Andrew",
+      host: false,
+      status: PlayerStatus.Waiting,
+      role: null,
+    };
+
+    const p2: PlayerState = {
+      username: "Joseph",
+      host: false,
+      status: PlayerStatus.Waiting,
+      role: null,
+    };
+
+    const p3: PlayerState = {
+      username: "Chris",
+      host: false,
+      status: PlayerStatus.Waiting,
+      role: null,
+    };
+
+    setPlayerList(
+      [p1, p2, p3].concat(players).sort((a, b) => {
+        if (a.host) {
+          return -1;
+        }
+        if (b.host) {
+          return 1;
+        }
+        return 0;
+      })
+    );
   }, []);
 
   return (
@@ -13,7 +49,12 @@ export function PlayerList() {
       <h3>Players</h3>
       <ul className="lobby-players-list">
         {playerList.map((player) => (
-          <Player username={player} displaySettings={true} key={crypto.randomUUID()} />
+          <Player
+            username={player.username}
+            displaySettings={true}
+            key={crypto.randomUUID()}
+            host={player.host}
+          />
         ))}
       </ul>
     </div>

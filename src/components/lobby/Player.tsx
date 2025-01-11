@@ -13,7 +13,7 @@ export function Player({
 }: PlayerProps) {
   return (
     <li className="player-list-item">
-      {username}
+      {username + (host ? " [host]" : "")}
       {displaySettings && (
         <button className="player-list-settings">
           <HiCog size={20} />

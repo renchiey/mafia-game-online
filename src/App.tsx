@@ -3,19 +3,30 @@ import "./App.css";
 import { LandingPage } from "./pages/LandingPage";
 import { ReactNode, useEffect, useState } from "react";
 import { GamePage } from "./pages/GamePage";
+import { PlayerState, PlayerStatus } from "./utils/types";
 
 function App() {
   let location = useLocation();
+
   const [screen, setScreen] = useState<ReactNode>(<LandingPage />);
 
   useEffect(() => {
     const searchParams = location.search.split("?");
-    console.log(searchParams);
 
     if (searchParams.length === 1) {
       setScreen(<LandingPage />);
     } else {
-      setScreen(<GamePage gameCode={searchParams[1]} />);
+      const { username } = location.state;
+
+      // TEST PLAYER OBJECT
+      const tempPlayer: PlayerState = {
+        username: username,
+        host: true,
+        role: null,
+        status: PlayerStatus.Waiting,
+      };
+
+      setScreen(<GamePage gameCode={searchParams[1]} player={tempPlayer} />);
     }
   }, [location]);
 

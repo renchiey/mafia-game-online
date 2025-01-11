@@ -14,7 +14,12 @@ export function RolesList({ numPlayers }: RolesList) {
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
 
   useEffect(() => {
-    setRoleItems([Roles.mafia.mafioso, Roles.mafia.mafioso, Roles.towns.townie, Roles.towns.doctor]);
+    setRoleItems([
+      Roles.mafia.mafioso,
+      Roles.mafia.mafioso,
+      Roles.towns.townie,
+      Roles.towns.doctor,
+    ]);
   }, []);
 
   const addRole = (role: GameRole) => {
@@ -49,17 +54,33 @@ export function RolesList({ numPlayers }: RolesList) {
       <div className="lobby-roles-container">
         <h3>Roles</h3>
         <div className="lobby-roles-list">
-          {roleItems.map((item, index) => (
-            <RoleItem role={item} onRemove={removeRole(index)} key={crypto.randomUUID()} />
-          ))}
+          {roleItems.length ? (
+            roleItems.map((item, index) => (
+              <RoleItem
+                role={item}
+                onRemove={removeRole(index)}
+                key={crypto.randomUUID()}
+              />
+            ))
+          ) : (
+            <h4>No roles added</h4>
+          )}
         </div>
         {roleItems.length < numPlayers && (
-          <button className="lobby-roles-add-btn" onClick={() => setShowAddModal(true)}>
+          <button
+            className="lobby-roles-add-btn"
+            onClick={() => setShowAddModal(true)}
+          >
             <HiOutlinePlus size={25} />
           </button>
         )}
       </div>
-      {showAddModal && <RolesModal addCallback={addRole} onClose={() => setShowAddModal(false)} />}
+      {showAddModal && (
+        <RolesModal
+          addCallback={addRole}
+          onClose={() => setShowAddModal(false)}
+        />
+      )}
     </>
   );
 }

@@ -1,36 +1,26 @@
-import { useLocation } from "react-router";
-import "./App.css";
-import { LandingPage } from "./pages/LandingPage";
+import { Landing } from "./views/landing";
+import { Game } from "./views/game";
 import { ReactNode, useEffect, useState } from "react";
-import { GamePage } from "./pages/GamePage";
-import { PlayerState, PlayerStatus } from "./utils/types";
+import { Player } from "./types";
+import { WebSocketProvider } from "./contexts/WSContext";
 
 function App() {
-  let location = useLocation();
-
-  const [screen, setScreen] = useState<ReactNode>(<LandingPage />);
+  const [view, setView] = useState<ReactNode>(<Landing />);
+  const [player, setPlayer] = useState<Player>({ username: "" });
 
   useEffect(() => {
     const searchParams = location.search.split("?");
-
-    if (searchParams.length === 1) {
-      setScreen(<LandingPage />);
-    } else {
-      const { username } = location.state;
-
-      // TEST PLAYER OBJECT
-      const tempPlayer: PlayerState = {
-        username: username,
-        host: true,
-        role: null,
-        status: PlayerStatus.Waiting,
-      };
-
-      setScreen(<GamePage gameCode={searchParams[1]} player={tempPlayer} />);
+    if (searchParams.length === 2) {
+      const gameCode = searchParams[1];
     }
-  }, [location]);
+  }, []);
 
-  return screen;
+  const setLanding = () => {
+    location.href = location.href.split("?")[0];
+    setView(<Landing />);
+  };
+
+  return <WebSocketProvider>{view}</WebSocketProvider>;
 }
 
 export default App;

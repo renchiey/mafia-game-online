@@ -1,3 +1,5 @@
+import { Message } from "../types";
+
 export const validateSessionId = (sessionId: string) => {
   if (sessionId.length === 5) {
     let code, i, len;
@@ -18,3 +20,7 @@ export const validateSessionId = (sessionId: string) => {
 
   return false;
 };
+
+export function instanceOfMessage(object: any): object is Message {
+  return object.type !== undefined && object.data !== undefined;
+}

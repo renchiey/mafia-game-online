@@ -1,4 +1,4 @@
-import { useEffect, createContext, ReactNode, useState, useRef } from "react";
+import { useEffect, createContext, ReactNode, useRef } from "react";
 import useWebSocket from "react-use-websocket";
 import { instanceOfMessage } from "../utils/helper";
 import { ChannelInterface, Message } from "../types";

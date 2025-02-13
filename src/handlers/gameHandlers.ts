@@ -1,12 +1,13 @@
-import { Message, GamePhase, Player, Room } from "../types";
+import { GamePhase, Message, Player, Room } from "../types";
+import { getClientRoomId } from "./socketHandlers";
 
 const rooms = new Map<string, Room>();
 
-export function setName(data: Message) {
+export function setName(clientId: string, data: Message) {
   // processing name
   let username = (data.data as string).trim().slice(20);
 
-  const room = rooms.get(data.roomId);
+  const room = rooms.get(getClientRoomId(clientId) as string);
 
   if (!username) {
     const numPlayers = room?.players.length;
@@ -14,7 +15,7 @@ export function setName(data: Message) {
     username = `Player ${numPlayers}`;
   }
 
-  const player = room?.players.find((player) => player.clientId == data.clientId);
+  const player = room?.players.find((player) => player.clientId == clientId);
 
   (player as Player).username = username;
 }
@@ -33,11 +34,11 @@ export function generateEmptyRoom(host: Player) {
 
   do {
     roomId = generateRoomId();
-  } while (rooms.has);
+  } while (rooms.has(roomId));
 
   const room: Room = {
     roomId,
-    creator: host.clientId,
+    host: host.clientId,
     players: [host],
     gameState: {
       round: 0,
@@ -52,15 +53,47 @@ export function generateEmptyRoom(host: Player) {
   };
 
   rooms.set(roomId, room);
+  console.log(`Room ${roomId} has been created`);
   return roomId;
 }
 
 export function joinRoom(player: Player, roomId: string) {
-  if (!rooms.has(roomId)) throw new Error("Invalid roomId.");
+  const room = rooms.get(roomId);
+
+  if (!room) {
+    return false;
+  }
+
+  room?.players.push(player);
+  return true;
 }
 
 export function removePlayer(clientId: string, roomId: string) {
-  const index = rooms.get(roomId)?.players.findIndex((player) => player.clientId == clientId);
+  const room = rooms.get(roomId);
 
-  rooms.get(roomId)?.players.splice(index as number, 1);
+  const index = room?.players.findIndex(
+    (player) => player.clientId == clientId
+  );
+
+  const [player] = rooms
+    .get(roomId)
+    ?.players.splice(index as number, 1) as Player[];
+
+  // closing room
+  if (room?.players.length == 0) {
+    rooms.delete(roomId);
+    console.log(`Room ${roomId} has closed.`);
+    return;
+  }
+
+  // setting new host
+  if (player.clientId === room?.host) {
+    const id = room.players[0].clientId;
+
+    room.host = id;
+  }
+}
+
+export function getRoom(roomId: string) {
+  return rooms.get(roomId);
 }

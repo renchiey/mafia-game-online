@@ -1,8 +1,14 @@
 import express from "express";
 import { WebSocketServer, WebSocket } from "ws";
 import { v4 as uuidv4 } from "uuid";
-import { Message, Player, GameEvent } from "./types";
-import { handleClose, handleJoinRoom, handleLeaveRoom, handleSetName, onConnection } from "./handlers/socketHandlers";
+import { Message, MessageType } from "./types";
+import {
+  handleClose,
+  handleJoinRoom,
+  handleLeaveRoom,
+  handleSetName,
+  onConnection,
+} from "./handlers/socketHandlers";
 
 const PORT = 8080;
 
@@ -23,27 +29,29 @@ wss.on("connection", (ws) => {
     try {
       const data: Message = JSON.parse(message);
 
-      if (!data.event || !data.clientId) {
-        throw new Error("Invalid message received.");
-      }
+      console.log(data);
 
-      switch (data.event) {
-        case GameEvent.SET_NAME:
-          handleSetName(data);
+      if (!data.type) throw new Error("Invalid message received.");
+
+      switch (data.type) {
+        case MessageType.SET_NAME:
+          handleSetName(clientId, data);
           break;
-        case GameEvent.CREATE_ROOM:
-        case GameEvent.JOIN_ROOM:
-          handleJoinRoom(ws, data);
+        case MessageType.JOIN_ROOM:
+          if (!data.data) throw new Error("No roomId provided.");
+          handleJoinRoom(clientId, ws, data);
           break;
-        case GameEvent.LEAVE_ROOM:
-          handleLeaveRoom(data);
+        case MessageType.CREATE_ROOM:
+          handleJoinRoom(clientId, ws, data);
+          break;
+        case MessageType.LEAVE_ROOM:
+          handleLeaveRoom(clientId);
           break;
         default:
-          throw new Error(`Unknown event type: ${data.event}`);
+          throw new Error(`Unknown event type: ${data.type}`);
       }
     } catch (error) {
       console.error("Error processing message:", error);
-      ws.send(JSON.stringify({ event: GameEvent.SERVER_ERR, message: error }));
     }
   });
 

@@ -30,6 +30,7 @@ export enum GamePhase {
   NIGHT = 0,
   DISCUSSION = 1,
   VOTING = 2,
+  COMPLETE = 3,
 }
 
 export interface GameState {
@@ -40,16 +41,14 @@ export interface GameState {
 
 export interface Room {
   roomId: string;
-  creator: string;
+  host: string;
   players: Player[];
   gameState: GameState;
   settings: Settings;
 }
 
 export interface Message {
-  event: GameEvent;
-  roomId: string;
-  clientId: string;
+  type: MessageType;
   data: any;
 }
 
@@ -58,32 +57,21 @@ export interface Client {
   roomId?: string;
 }
 
-export enum GameEvent {
-  // CLient Events
-  CONNECT = "connect",
-  DISCONNECT = "disconnecting",
-  CREATE_ROOM = "createRoom",
-  JOIN_ROOM = "joinRoom",
-  LEAVE_ROOM = "leaveRoom",
-  START_GAME = "startGame",
-  DRAW = "draw",
-  GUESS = "guess",
-  CHANGE_SETTIING = "changeSettings",
-  WORD_SELECT = "wordSelect",
-  SET_NAME = "setName",
+export enum MessageType {
+  // Client Events
+  CREATE_ROOM = "create-room",
+  JOIN_ROOM = "join-room",
+  LEAVE_ROOM = "leave-room",
+  START_GAME = "start-game",
+  CHANGE_SETTIING = "change-settings",
+  SET_NAME = "set-name",
+  STATE_UPDATE = "state-update",
 
   // Server Events
-  JOINED_ROOM = "joinedRoom",
-  PLAYER_JOINED = "playerJoined",
-  PLAYER_LEFT = "playerLeft",
-  GAME_STARTED = "gameStarted",
-  GAME_ENDED = "gameEnded",
-  DRAW_DATA = "drawData",
-  GUESSED = "guessed",
-  TURN_END = "turnEnded",
-  CHOOSE_WORD = "chooseWord",
-  WORD_CHOSEN = "wordChosen",
-  SETTINGS_CHANGED = "settingsChanged",
-  GUESS_FAIL = "guessFail",
-  SERVER_ERR = "serverError",
+  JOINED_ROOM = "joined-room",
+  PLAYER_JOINED = "player-joined",
+  PLAYER_LEFT = "player-left",
+  GAME_STARTED = "game-started",
+  GAME_ENDED = "game-ended",
+  SERVER_ERR = "server-error",
 }

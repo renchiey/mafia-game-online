@@ -6,6 +6,7 @@ import {
   handleClose,
   handleJoinRoom,
   handleLeaveRoom,
+  handleSendUpdate,
   handleSetName,
   onConnection,
 } from "./handlers/socketHandlers";
@@ -43,6 +44,9 @@ wss.on("connection", (ws) => {
           break;
         case MessageType.CREATE_ROOM:
           handleJoinRoom(clientId, ws, data);
+          break;
+        case MessageType.GET_UPDATE:
+          handleSendUpdate(clientId, ws);
           break;
         case MessageType.LEAVE_ROOM:
           handleLeaveRoom(clientId);

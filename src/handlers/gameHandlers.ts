@@ -5,7 +5,7 @@ const rooms = new Map<string, Room>();
 
 export function setName(clientId: string, data: Message) {
   // processing name
-  let username = (data.data as string).trim().slice(20);
+  let username = (data.data as string).trim().slice(0, 20);
 
   const room = rooms.get(getClientRoomId(clientId) as string);
 
@@ -17,7 +17,9 @@ export function setName(clientId: string, data: Message) {
 
   const player = room?.players.find((player) => player.clientId == clientId);
 
+  console.log(player);
   (player as Player).username = username;
+  console.log(player);
 }
 
 export function generateRoomId() {

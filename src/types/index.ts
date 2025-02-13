@@ -14,10 +14,8 @@ export interface Role {
 
 export interface Player {
   clientId: string;
-  socket: WebSocket;
   username?: string;
-  role?: string;
-  allegiance?: number;
+  role?: Role;
 }
 
 export interface Settings {
@@ -65,13 +63,15 @@ export enum MessageType {
   START_GAME = "start-game",
   CHANGE_SETTIING = "change-settings",
   SET_NAME = "set-name",
-  STATE_UPDATE = "state-update",
+  GET_UPDATE = "get-update",
 
   // Server Events
   JOINED_ROOM = "joined-room",
+  INVALID_ROOM = "invalid-room",
   PLAYER_JOINED = "player-joined",
   PLAYER_LEFT = "player-left",
   GAME_STARTED = "game-started",
   GAME_ENDED = "game-ended",
   SERVER_ERR = "server-error",
+  STATE_UPDATE = "state-update",
 }

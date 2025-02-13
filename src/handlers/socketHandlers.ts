@@ -36,7 +36,6 @@ export function handleSetName(clientId: string, data: Message) {
 export function handleJoinRoom(clientId: string, ws: WebSocket, data: Message) {
   const player: Player = {
     clientId,
-    socket: ws,
   };
 
   let roomId;
@@ -47,7 +46,13 @@ export function handleJoinRoom(clientId: string, ws: WebSocket, data: Message) {
 
     if (data.type == MessageType.JOIN_ROOM) {
       if (!joinRoom(player, data.data)) {
-        throw new Error("Room does not exist.");
+        ws.send(
+          JSON.stringify({
+            type: MessageType.INVALID_ROOM,
+            data: "RoomId could not be found.",
+          })
+        );
+        return;
       }
 
       roomId = data.data;
@@ -55,16 +60,16 @@ export function handleJoinRoom(clientId: string, ws: WebSocket, data: Message) {
 
     if (data.type == MessageType.CREATE_ROOM) {
       roomId = generateEmptyRoom(player);
-
-      ws.send(JSON.stringify({ type: "room-id", data: roomId }));
     }
 
     (clients.get(clientId) as Client).roomId = roomId;
 
+    ws.send(JSON.stringify({ type: MessageType.JOINED_ROOM, data: roomId }));
+
     console.log(`Player ${clientId} has joined a room.`);
 
     // broadcast new state to room
-    broadcastStateToRoom(roomId as string);
+    broadcastStateToRoom(roomId);
   } catch (error) {
     console.error("Error joining game:", error);
   }
@@ -96,20 +101,46 @@ export function handleClose(clientId: string) {
   console.log(`Client ${clientId} has disconnected.`);
 }
 
+export function handleSendUpdate(clientId: string, ws: WebSocket) {
+  const roomId = clients.get(clientId)?.roomId;
+
+  if (!roomId) {
+    console.log(`Client ${clientId} not in room.`);
+    return;
+  }
+
+  const room = getRoom(roomId);
+
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(
+      JSON.stringify({
+        type: MessageType.STATE_UPDATE,
+        data: {
+          roomData: room,
+          clientId: clientId,
+        },
+      })
+    );
+  }
+}
+
 function broadcastStateToRoom(roomId: string) {
   const room = getRoom(roomId);
 
   if (!room) throw new Error("Invalid roomId.");
 
-  const msg: Message = {
-    type: MessageType.STATE_UPDATE,
-    data: room,
-  };
-
   room.players.forEach((player) => {
     const client = (clients.get(player.clientId) as Client).ws;
     if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(msg));
+      client.send(
+        JSON.stringify({
+          type: MessageType.STATE_UPDATE,
+          data: {
+            roomData: room,
+            clientId: player.clientId,
+          },
+        })
+      );
     }
   });
 }

@@ -24,3 +24,7 @@ export const validateSessionId = (sessionId: string) => {
 export function instanceOfMessage(object: any): object is Message {
   return object.type !== undefined && object.data !== undefined;
 }
+
+export function changeURL(newPath: string) {
+  history.pushState({}, "", newPath);
+}

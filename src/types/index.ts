@@ -1,16 +1,7 @@
-import { SetStateAction } from "react";
-
 export enum PlayerStatus {
   Alive,
   Dead,
   Waiting,
-}
-
-export enum GamePhase {
-  NIGHT = 0,
-  DISCUSSION = 1,
-  VOTING = 2,
-  COMPLETE = 3,
 }
 
 export interface Allegiance {
@@ -26,9 +17,9 @@ export interface Role {
 }
 
 export interface Player {
-  username: string;
+  clientId: string;
+  username?: string;
   role?: Role;
-  status?: PlayerStatus;
 }
 
 export interface PlayerContext {
@@ -36,7 +27,32 @@ export interface PlayerContext {
   setPlayer: React.Dispatch<React.SetStateAction<Player>>;
 }
 
-export interface Room {}
+export interface Settings {
+  maxPlayers: number;
+  roundSpeed: number;
+  roles: Role[];
+}
+
+export enum GamePhase {
+  NIGHT = 0,
+  DISCUSSION = 1,
+  VOTING = 2,
+  COMPLETE = 3,
+}
+
+export interface GameState {
+  round: number;
+  phase: GamePhase;
+  dead: Player[];
+}
+
+export interface Room {
+  roomId: string;
+  host: string;
+  players: Player[];
+  gameState: GameState;
+  settings: Settings;
+}
 
 export interface Message {
   type: MessageType;
@@ -51,15 +67,17 @@ export enum MessageType {
   START_GAME = "start-game",
   CHANGE_SETTIING = "change-settings",
   SET_NAME = "set-name",
-  STATE_UPDATE = "state-update",
+  GET_UPDATE = "get-update",
 
   // Server Events
   JOINED_ROOM = "joined-room",
+  INVALID_ROOM = "invalid-room",
   PLAYER_JOINED = "player-joined",
   PLAYER_LEFT = "player-left",
   GAME_STARTED = "game-started",
   GAME_ENDED = "game-ended",
   SERVER_ERR = "server-error",
+  STATE_UPDATE = "state-update",
 }
 
 export interface ChannelInterface {

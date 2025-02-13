@@ -1,26 +1,39 @@
 import { Landing } from "./views/landing";
 import { Game } from "./views/game";
-import { ReactNode, useEffect, useState } from "react";
-import { Player } from "./types";
-import { WebSocketProvider } from "./contexts/WSContext";
+import { ReactNode, useContext, useEffect, useState } from "react";
+import { MessageType } from "./types";
+import { WebSocketContext } from "./contexts/WSContext";
 
 function App() {
   const [view, setView] = useState<ReactNode>(<Landing />);
-  const [player, setPlayer] = useState<Player>({ username: "" });
+  const [subscribe, unsubscribe] = useContext(WebSocketContext);
 
   useEffect(() => {
     const searchParams = location.search.split("?");
     if (searchParams.length === 2) {
-      const gameCode = searchParams[1];
+      setView(<Landing roomId={searchParams[1]} />);
     }
   }, []);
 
-  const setLanding = () => {
-    location.href = location.href.split("?")[0];
-    setView(<Landing />);
-  };
+  useEffect(() => {
+    const channels = [MessageType.JOINED_ROOM, MessageType.INVALID_ROOM];
 
-  return <WebSocketProvider>{view}</WebSocketProvider>;
+    subscribe(channels[0], () => {
+      setView(<Game />);
+    });
+
+    subscribe(channels[1], (data: any) => {
+      console.log(data);
+
+      location.href = "http://localhost:5173/";
+    });
+
+    return () => {
+      channels.forEach((channelName) => unsubscribe(channelName));
+    };
+  }, [subscribe, unsubscribe]);
+
+  return view;
 }
 
 export default App;

@@ -26,6 +26,8 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   color: white;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 body {

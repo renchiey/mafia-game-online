@@ -22,6 +22,22 @@ export function Lobby({
 }: LobbyProps) {
   const [copyFeedback, setCopyFeedback] = useState("");
   const [subscribe, unsubscribe, send] = useContext(WebSocketContext);
+  const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
+
+  useEffect(() => {
+    if (playerId == hostId) send({ type: MessageType.GET_ROLES });
+  }, []);
+
+  useEffect(() => {
+    const channel = "roles";
+
+    subscribe(channel, (data: Role[]) => {
+      setAvailableRoles(data);
+      console.log(data);
+    });
+
+    return () => unsubscribe(channel);
+  }, [subscribe, unsubscribe]);
 
   const handleCopyLink = () => {
     setCopyFeedback("Invite link copied!");
@@ -36,9 +52,14 @@ export function Lobby({
   return (
     <div className="flex flex-col justify-center items-center md:h-full">
       <div></div>
-      <div className=" flex md:gap-10 md:flex-row flex-col">
+      <div className=" flex gap-5  md:flex-row flex-col">
         <PlayerList players={players} hostId={hostId} playerId={playerId} />
-        <RoleList roles={roles} />
+        <RoleList
+          roles={roles}
+          availableRoles={availableRoles}
+          numPlayers={players.length}
+          isHost={playerId == hostId}
+        />
       </div>
       <div className="mt-10">
         <Button onClick={handleCopyLink}>invite link</Button>

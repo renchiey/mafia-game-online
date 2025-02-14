@@ -3,11 +3,15 @@ import { ReactNode } from "react";
 interface ListHeadItemProps {
   children: ReactNode;
   className?: string;
+  span?: number;
 }
 
-export function ListHeadItem({ children, className }: ListHeadItemProps) {
+export function ListHeadItem({ children, className, span }: ListHeadItemProps) {
   return (
-    <th className={className ? className : "p-2 hidden md:block font-semibold"}>
+    <th
+      colSpan={span}
+      className={className ? className : "p-2 hidden md:block font-semibold "}
+    >
       {children}
     </th>
   );

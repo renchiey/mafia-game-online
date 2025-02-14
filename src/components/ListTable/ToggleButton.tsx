@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { FaAngleUp } from "react-icons/fa";
 
 interface ToggleButtonProps {

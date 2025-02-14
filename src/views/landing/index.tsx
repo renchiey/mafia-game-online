@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { TextInput } from "../../components/TextInput";
 import { Button } from "../../components/Button";
 import { WebSocketContext } from "../../contexts/WSContext";
-import { Message, MessageType } from "../../types";
+import { MessageType } from "../../types";
 import { changeURL } from "../../utils/helper";
 
 interface LandingProps {
@@ -11,9 +11,30 @@ interface LandingProps {
 
 export function Landing({ roomId }: LandingProps) {
   const [username, setUsername] = useState("");
-  const [subscribe, unsubscribe, send] = useContext<any>(WebSocketContext);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [subscribe, unsubscribe, send, connected] =
+    useContext<any>(WebSocketContext);
+
+  useEffect(() => {
+    const channel = MessageType.INVALID_ROOM;
+
+    subscribe(channel, () => displayError("Invalid room code."));
+
+    return () => {
+      unsubscribe(channel);
+    };
+  }, [subscribe, unsubscribe]);
 
   const handleJoinGame = () => {
+    if (!connected) {
+      displayError("Not connected to server.");
+      return;
+    }
+    if (!roomId) {
+      displayError("No invite link provided.");
+      return;
+    }
+
     send({
       type: MessageType.JOIN_ROOM,
       data: roomId,
@@ -25,6 +46,11 @@ export function Landing({ roomId }: LandingProps) {
   };
 
   const handleCreateGame = () => {
+    if (!connected) {
+      displayError("Not connected to server.");
+      return;
+    }
+
     send({
       type: MessageType.CREATE_ROOM,
       data: null,
@@ -37,19 +63,20 @@ export function Landing({ roomId }: LandingProps) {
     changeURL("/");
   };
 
+  const displayError = (msg: string) => {
+    setErrorMessage(msg);
+
+    setTimeout(() => {
+      setErrorMessage("");
+    }, 3000);
+  };
+
   return (
-    <div>
-      <h1
-        className="absolute text-4xl font-semibold w-screen text-center my-10"
-        onClick={() => (window.location.href = import.meta.env.BASE_URL)}
-      >
-        Mafia Online
-      </h1>
-      <div className=" flex flex-col justify-center items-center h-screen">
-        <TextInput setUsername={setUsername} />
-        <Button onClick={handleJoinGame}>Join Game</Button>
-        <Button onClick={handleCreateGame}>Create Game</Button>
-      </div>
+    <div className=" flex flex-col justify-center items-center h-full ">
+      <TextInput setUsername={setUsername} />
+      <Button onClick={handleJoinGame}>Join Game</Button>
+      <Button onClick={handleCreateGame}>Create Game</Button>
+      <div className=" h-[16px] text-red-500">{errorMessage}</div>
     </div>
   );
 }

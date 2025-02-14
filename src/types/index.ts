@@ -60,6 +60,12 @@ export interface Message {
 }
 
 export enum MessageType {
+  // Getters
+  GET_STATE = "get-state",
+  GET_ROOMID = "get-roomid",
+  GET_PLAYERS = "get-players",
+  GET_CLIENTID = "get-clientid",
+
   // Client Events
   CREATE_ROOM = "create-room",
   JOIN_ROOM = "join-room",
@@ -67,7 +73,6 @@ export enum MessageType {
   START_GAME = "start-game",
   CHANGE_SETTIING = "change-settings",
   SET_NAME = "set-name",
-  GET_UPDATE = "get-update",
 
   // Server Events
   JOINED_ROOM = "joined-room",

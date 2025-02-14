@@ -16,24 +16,30 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const channels = [MessageType.JOINED_ROOM, MessageType.INVALID_ROOM];
+    const channel = MessageType.JOINED_ROOM;
 
-    subscribe(channels[0], () => {
+    subscribe(channel, () => {
       setView(<Game />);
     });
 
-    subscribe(channels[1], (data: any) => {
-      console.log(data);
-
-      location.href = "http://localhost:5173/";
-    });
-
     return () => {
-      channels.forEach((channelName) => unsubscribe(channelName));
+      unsubscribe(channel);
     };
   }, [subscribe, unsubscribe]);
 
-  return view;
+  return (
+    <div className="h-screen flex flex-col ">
+      <div className=" w-full py-10 flex justify-center">
+        <div
+          className="text-4xl font-semibold cursor-pointer"
+          onClick={() => (window.location.href = import.meta.env.BASE_URL)}
+        >
+          Mafia IRL Online
+        </div>
+      </div>
+      {view}
+    </div>
+  );
 }
 
 export default App;

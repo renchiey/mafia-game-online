@@ -1,4 +1,4 @@
-import { useEffect, createContext, ReactNode, useRef } from "react";
+import { useEffect, createContext, ReactNode, useRef, useState } from "react";
 import useWebSocket from "react-use-websocket";
 import { instanceOfMessage } from "../utils/helper";
 import { ChannelInterface, Message } from "../types";
@@ -12,9 +12,15 @@ interface WebSocketProviderProps {
 export function WebSocketProvider({ children }: WebSocketProviderProps) {
   const WS_URL = "ws://localhost:8080";
   const channels = useRef<ChannelInterface>({});
+  const [connected, setConnected] = useState(false);
 
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(WS_URL, {
-    onOpen: () => console.log("websocket opened."),
+    onOpen: () => {
+      setConnected(true);
+      console.log("Connected.");
+    },
+    onError: () => setConnected(false),
+    shouldReconnect: () => true,
   });
 
   const subscribe = (channel: string, callback: any) => {
@@ -38,7 +44,9 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
   }, [lastJsonMessage]);
 
   return (
-    <WebSocketContext.Provider value={[subscribe, unsubscribe, send]}>
+    <WebSocketContext.Provider
+      value={[subscribe, unsubscribe, send, connected]}
+    >
       {children}
     </WebSocketContext.Provider>
   );

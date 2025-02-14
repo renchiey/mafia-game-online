@@ -8,10 +8,11 @@ export function Game() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [playerId, setPlayerId] = useState<string>("");
   const [hostId, setHostId] = useState<string>("");
+  const [roomId, setRoomId] = useState<string>("");
 
   useEffect(() => {
     // Get initial room data
-    send({ type: MessageType.GET_UPDATE });
+    send({ type: MessageType.GET_STATE });
   }, []);
 
   useEffect(() => {
@@ -24,8 +25,17 @@ export function Game() {
       setPlayerId(clientId);
       setPlayers((roomData as Room).players);
       setHostId((roomData as Room).host);
+      setRoomId((roomData as Room).roomId);
     });
   }, [subscribe, unsubscribe]);
 
-  return <Lobby players={players} hostId={hostId} playerId={playerId}></Lobby>;
+  return (
+    <Lobby
+      players={players}
+      roles={[]}
+      hostId={hostId}
+      playerId={playerId}
+      roomId={roomId}
+    ></Lobby>
+  );
 }

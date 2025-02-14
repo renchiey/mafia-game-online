@@ -8,26 +8,33 @@ import {
   MessageType,
 } from "../types";
 import {
+  addRole,
   generateEmptyRoom,
   getRoom,
   joinRoom,
   removePlayer,
   setName,
 } from "./gameHandlers";
+import { ROLES } from "../utils/roles";
+import { instanceOfRole } from "../utils/typeCheck";
 
 const clients = new Map<string, Client>();
 
 export function onConnection(clientId: string, ws: WebSocket) {
   clients.set(clientId, { ws });
 
-  console.log(`Client connected with ID: ${clientId}`);
+  console.log(`[SERVER EVENT] Client connected with ID: ${clientId}`);
 }
 
 export function handleSetName(clientId: string, data: Message) {
   try {
     setName(clientId, data);
 
-    console.log(`Player ${clientId} has set their username to: ${data.data}`);
+    console.log(
+      `[SERVER EVENT] Client ${clientId} has set their username to: ${data.data}`
+    );
+
+    broadcastStateToRoom(clients.get(clientId)?.roomId);
   } catch (error) {
     console.error("Error setting name:", error);
   }
@@ -42,7 +49,7 @@ export function handleJoinRoom(clientId: string, ws: WebSocket, data: Message) {
 
   try {
     if (data.type == MessageType.JOIN_ROOM && !data.data)
-      throw new Error("RoomId is required to join a room");
+      throw new Error("RoomId is required to join a room.");
 
     if (data.type == MessageType.JOIN_ROOM) {
       if (!joinRoom(player, data.data)) {
@@ -66,7 +73,7 @@ export function handleJoinRoom(clientId: string, ws: WebSocket, data: Message) {
 
     ws.send(JSON.stringify({ type: MessageType.JOINED_ROOM, data: roomId }));
 
-    console.log(`Player ${clientId} has joined a room.`);
+    console.log(`[SERVER EVENT] Client ${clientId} has joined a room.`);
 
     // broadcast new state to room
     broadcastStateToRoom(roomId);
@@ -98,14 +105,14 @@ export function handleClose(clientId: string) {
 
   clients.delete(clientId);
 
-  console.log(`Client ${clientId} has disconnected.`);
+  console.log(`[SERVER EVENT] Client ${clientId} has disconnected.`);
 }
 
 export function handleSendUpdate(clientId: string, ws: WebSocket) {
   const roomId = clients.get(clientId)?.roomId;
 
   if (!roomId) {
-    console.log(`Client ${clientId} not in room.`);
+    console.log(`[SERVER ERR] Client ${clientId} not in room.`);
     return;
   }
 
@@ -124,7 +131,34 @@ export function handleSendUpdate(clientId: string, ws: WebSocket) {
   }
 }
 
-function broadcastStateToRoom(roomId: string) {
+export function handleSendRoles(clientId: string, ws: WebSocket) {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(
+      JSON.stringify({
+        type: MessageType.ROLES,
+        data: ROLES,
+      })
+    );
+  }
+}
+
+export function handleAddRole(clientId: string, ws: WebSocket, data: any) {
+  if (!instanceOfRole(data.data)) {
+    console.log(
+      "[SERVER ERR]: Sent role format does not match role format on server."
+    );
+
+    return;
+  }
+
+  addRole(clients.get(clientId)?.roomId as string, data.data);
+
+  broadcastStateToRoom(clients.get(clientId)?.roomId as string);
+}
+
+function broadcastStateToRoom(roomId: string | undefined) {
+  if (!roomId) return;
+
   const room = getRoom(roomId);
 
   if (!room) throw new Error("Invalid roomId.");

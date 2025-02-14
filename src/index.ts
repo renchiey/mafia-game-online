@@ -3,9 +3,11 @@ import { WebSocketServer, WebSocket } from "ws";
 import { v4 as uuidv4 } from "uuid";
 import { Message, MessageType } from "./types";
 import {
+  handleAddRole,
   handleClose,
   handleJoinRoom,
   handleLeaveRoom,
+  handleSendRoles,
   handleSendUpdate,
   handleSetName,
   onConnection,
@@ -30,9 +32,11 @@ wss.on("connection", (ws) => {
     try {
       const data: Message = JSON.parse(message);
 
-      console.log(data);
-
       if (!data.type) throw new Error("Invalid message received.");
+
+      console.log(
+        `[CLIENT MSG]: client ${clientId} sent a message of type: ${data.type}`
+      );
 
       switch (data.type) {
         case MessageType.SET_NAME:
@@ -45,8 +49,14 @@ wss.on("connection", (ws) => {
         case MessageType.CREATE_ROOM:
           handleJoinRoom(clientId, ws, data);
           break;
-        case MessageType.GET_UPDATE:
+        case MessageType.GET_STATE:
           handleSendUpdate(clientId, ws);
+          break;
+        case MessageType.GET_ROLES:
+          handleSendRoles(clientId, ws);
+          break;
+        case MessageType.ADD_ROLE:
+          handleAddRole(clientId, ws, data);
           break;
         case MessageType.LEAVE_ROOM:
           handleLeaveRoom(clientId);

@@ -41,6 +41,7 @@ export interface Room {
   roomId: string;
   host: string;
   players: Player[];
+  rolesPool: Role[];
   gameState: GameState;
   settings: Settings;
 }
@@ -56,6 +57,16 @@ export interface Client {
 }
 
 export enum MessageType {
+  // Client Getters
+  GET_STATE = "get-state",
+  GET_ROOMID = "get-roomid",
+  GET_PLAYERS = "get-players",
+  GET_CLIENTID = "get-clientid",
+  GET_ROLES = "get-roles",
+
+  // Data
+  ROLES = "roles",
+
   // Client Events
   CREATE_ROOM = "create-room",
   JOIN_ROOM = "join-room",
@@ -63,7 +74,7 @@ export enum MessageType {
   START_GAME = "start-game",
   CHANGE_SETTIING = "change-settings",
   SET_NAME = "set-name",
-  GET_UPDATE = "get-update",
+  ADD_ROLE = "add-role",
 
   // Server Events
   JOINED_ROOM = "joined-room",

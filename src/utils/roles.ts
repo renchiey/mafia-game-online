@@ -1,19 +1,29 @@
 import { Allegiance, Role } from "../types";
-import { DoctorIcon, InvestigatorIcon, JesterIcon, MafiosoIcon, TownieIcon, TransportIcon, VeteranIcon } from "./icons";
+import {
+  DoctorIcon,
+  InvestigatorIcon,
+  JesterIcon,
+  MafiosoIcon,
+  TownieIcon,
+  TransportIcon,
+  VeteranIcon,
+} from "./icons";
 
+// TailwindCSS does not allow dynamic classnames
+// therefore existing classnames must be used for color
 export const TOWNS: Allegiance = {
   name: "Towns",
-  color: "#069401",
+  color: "text-green-600",
 };
 
 export const MAFIA: Allegiance = {
   name: "Mafia",
-  color: "#a81100",
+  color: "text-red-600",
 };
 
 export const NEUTRAL: Allegiance = {
   name: "Neutral",
-  color: "#919191",
+  color: "text-gray-600",
 };
 
 export const ROLES: Role[] = [
@@ -21,7 +31,8 @@ export const ROLES: Role[] = [
     name: "Mafioso",
     iconSrc: MafiosoIcon,
     allegiance: MAFIA,
-    description: "Kill someone each night until no one can stand in the way of the Mafia.",
+    description:
+      "Kill someone each night until no one can stand in the way of the Mafia.",
   },
   {
     name: "Investigator",
@@ -45,7 +56,8 @@ export const ROLES: Role[] = [
     name: "Veteran",
     iconSrc: VeteranIcon,
     allegiance: TOWNS,
-    description: "Decide if you will go on alert on a certain night and kill anyone who visits you.",
+    description:
+      "Decide if you will go on alert on a certain night and kill anyone who visits you.",
   },
   {
     name: "Transporter",

@@ -1,4 +1,4 @@
-import { GamePhase, Message, Player, Room } from "../types";
+import { GamePhase, Message, Player, Role, Room } from "../types";
 import { getClientRoomId } from "./socketHandlers";
 
 const rooms = new Map<string, Room>();
@@ -17,9 +17,7 @@ export function setName(clientId: string, data: Message) {
 
   const player = room?.players.find((player) => player.clientId == clientId);
 
-  console.log(player);
   (player as Player).username = username;
-  console.log(player);
 }
 
 export function generateRoomId() {
@@ -42,6 +40,7 @@ export function generateEmptyRoom(host: Player) {
     roomId,
     host: host.clientId,
     players: [host],
+    rolesPool: [],
     gameState: {
       round: 0,
       phase: GamePhase.NIGHT,
@@ -55,7 +54,7 @@ export function generateEmptyRoom(host: Player) {
   };
 
   rooms.set(roomId, room);
-  console.log(`Room ${roomId} has been created`);
+  console.log(`[SERVER EVENT] Room ${roomId} has been created`);
   return roomId;
 }
 
@@ -84,7 +83,7 @@ export function removePlayer(clientId: string, roomId: string) {
   // closing room
   if (room?.players.length == 0) {
     rooms.delete(roomId);
-    console.log(`Room ${roomId} has closed.`);
+    console.log(`[SERVER EVENT] Room ${roomId} has closed.`);
     return;
   }
 
@@ -98,4 +97,30 @@ export function removePlayer(clientId: string, roomId: string) {
 
 export function getRoom(roomId: string) {
   return rooms.get(roomId);
+}
+
+export function addRole(roomId: string, role: Role) {
+  const room = rooms.get(roomId);
+
+  room?.rolesPool.push(role);
+
+  // sort based on name
+  room?.rolesPool.sort((a, b) => {
+    if (a.name < b.name) {
+      return -1;
+    } else if (a.name > b.name) {
+      return 1;
+    }
+    return 0;
+  });
+
+  // sort based on allegiance
+  room?.rolesPool.sort((a, b) => {
+    if (a.allegiance.name < b.allegiance.name) {
+      return -1;
+    } else if (a.allegiance.name > b.allegiance.name) {
+      return 1;
+    }
+    return 0;
+  });
 }

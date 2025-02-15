@@ -1,17 +1,21 @@
 interface ButtonProps {
-  children: string;
-  onClick: () => void;
+  children?: string;
+  onClick?: () => void;
+  className?: string;
 }
 
-export function Button({ children, onClick }: ButtonProps) {
+export function Button({ children, onClick, className }: ButtonProps) {
   return (
-    <div className="p-4">
-      <button
-        className="cursor-pointer text-lg font-medium border-1 px-4 py-2 rounded-xl"
-        onClick={onClick}
-      >
-        {children}
-      </button>
-    </div>
+    <button
+      className={
+        "text-lg font-medium " +
+        (className
+          ? className
+          : "border-1 px-4 py-2 rounded-xl p-4 cursor-pointer hover:bg-blue-800 active:bg-blue-800")
+      }
+      onClick={onClick}
+    >
+      {children}
+    </button>
   );
 }

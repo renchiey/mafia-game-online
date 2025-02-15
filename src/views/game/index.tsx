@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { WebSocketContext } from "../../contexts/WSContext";
-import { MessageType, Player, Role, Room } from "../../types";
+import { MessageType, Player, Role, Room, Settings } from "../../types";
 import { Lobby } from "../lobby";
 
 export function Game() {
@@ -8,6 +8,12 @@ export function Game() {
     useContext(WebSocketContext);
   const [players, setPlayers] = useState<Player[]>([]);
   const [rolesPool, setRolesPool] = useState<Role[]>([]);
+  const [settings, setSettings] = useState<Settings>({
+    maxPlayers: 1,
+    roundSpeed: 1,
+    revealRoleAfterDeath: true,
+    narrator: true,
+  });
   const [playerId, setPlayerId] = useState<string>("");
   const [hostId, setHostId] = useState<string>("");
   const [roomId, setRoomId] = useState<string>("");
@@ -22,17 +28,19 @@ export function Game() {
   }, [connected]);
 
   useEffect(() => {
-    const channelName = MessageType.STATE_UPDATE;
+    const channelName = MessageType.STATE;
 
     subscribe(channelName, (data: any) => {
-      const { roomData, clientId } = data;
+      const { room, clientId } = data;
 
-      console.log(data);
+      console.log("data", data);
+      console.log(room);
       setPlayerId(clientId);
-      setPlayers((roomData as Room).players);
-      setRolesPool((roomData as Room).rolesPool);
-      setHostId((roomData as Room).host);
-      setRoomId((roomData as Room).roomId);
+      setPlayers((room as Room).players);
+      setRolesPool((room as Room).rolesPool);
+      setSettings((room as Room).settings);
+      setHostId((room as Room).host);
+      setRoomId((room as Room).roomId);
     });
   }, [subscribe, unsubscribe]);
 
@@ -40,6 +48,7 @@ export function Game() {
     <Lobby
       players={players}
       roles={rolesPool}
+      settings={settings}
       hostId={hostId}
       playerId={playerId}
       roomId={roomId}

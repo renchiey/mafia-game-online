@@ -5,7 +5,7 @@ import { ListHead } from "../ListTable/ListHead";
 import { ListBody } from "../ListTable/ListBody";
 import { ListHeadItem } from "../ListTable/ListHeadItem";
 import { ListRowItem } from "../ListTable/ListRowItem";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { WebSocketContext } from "../../contexts/WSContext";
 import { IoCloseOutline } from "react-icons/io5";
 
@@ -37,6 +37,8 @@ export function RoleList({
   };
 
   const handleRowClick = (index: number) => {
+    if (!isHost) return;
+
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     setRowShowRemove(index);
@@ -47,6 +49,8 @@ export function RoleList({
   };
 
   const handleRemoveRole = (index: number) => {
+    if (!isHost) return;
+
     send({
       type: MessageType.REMOVE_ROLE,
       data: index,
@@ -98,7 +102,7 @@ export function RoleList({
             <ListRow>
               <ListRowItem className="text-center p-2 col-span-2 " span={2}>
                 <button
-                  className="font-semibold cursor-pointer border-0 px-2 py-1 rounded-full bg-gray-300"
+                  className="font-semibold cursor-pointer border-0 px-2 py-1 rounded-full bg-gray-300 active:bg-gray-400 hover:bg-gray-400"
                   onClick={() => setShowAddRole(false)}
                 >
                   Close
@@ -126,8 +130,9 @@ export function RoleList({
                 </ListRowItem>
                 <td
                   className={
-                    "group-hover:block group-focus-within:block absolute right-3 bottom-0 top-0 mt-auto mb-auto h-5 w-5 cursor-pointer " +
-                    (index == rowShowRemove ? " block" : "hidden")
+                    "group-focus-within:block absolute right-3 bottom-0 top-0 mt-auto mb-auto h-5 w-5 cursor-pointer " +
+                    (index == rowShowRemove && isHost ? " block " : "hidden ") +
+                    (isHost && "group-hover:block")
                   }
                   onClick={() => handleRemoveRole(index)}
                 >
@@ -139,7 +144,7 @@ export function RoleList({
               <ListRow>
                 <ListRowItem className="text-center p-2 col-span-2 " span={2}>
                   <button
-                    className="font-semibold cursor-pointer border-0 px-2 py-1 rounded-full bg-gray-300"
+                    className="font-semibold cursor-pointer border-0 px-2 py-1 rounded-full bg-gray-300 active:bg-gray-400 hover:bg-gray-400"
                     onClick={() => setShowAddRole(true)}
                   >
                     Add Role

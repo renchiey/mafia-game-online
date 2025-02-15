@@ -30,10 +30,6 @@ export function Landing({ roomId }: LandingProps) {
   useEffect(() => {
     if (!connected) {
       setShowDisconnectModal(true);
-
-      setTimeout(() => {
-        setShowDisconnectModal(false);
-      }, 5000);
     } else {
       setShowDisconnectModal(false);
     }
@@ -88,11 +84,18 @@ export function Landing({ roomId }: LandingProps) {
   return (
     <div className=" flex flex-col justify-center items-center h-full ">
       <TextInput setUsername={setUsername} />
-      <Button onClick={handleJoinGame}>Join Game</Button>
-      <Button onClick={handleCreateGame}>Create Game</Button>
+      <div className="p-4">
+        <Button onClick={handleJoinGame}>Join Game</Button>
+      </div>
+      <div className="p-4">
+        <Button onClick={handleCreateGame}>Create Game</Button>
+      </div>
       <div className=" h-[16px] text-red-500">{errorMessage}</div>
 
-      <DisconnectedModal show={showDisconnectModal} />
+      <DisconnectedModal
+        show={showDisconnectModal}
+        closeModal={() => setShowDisconnectModal(false)}
+      />
     </div>
   );
 }

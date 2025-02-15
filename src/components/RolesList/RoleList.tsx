@@ -5,8 +5,9 @@ import { ListHead } from "../ListTable/ListHead";
 import { ListBody } from "../ListTable/ListBody";
 import { ListHeadItem } from "../ListTable/ListHeadItem";
 import { ListRowItem } from "../ListTable/ListRowItem";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { WebSocketContext } from "../../contexts/WSContext";
+import { IoCloseOutline } from "react-icons/io5";
 
 interface RoleListProps {
   roles: Role[];
@@ -23,6 +24,8 @@ export function RoleList({
 }: RoleListProps) {
   const [showAddRole, setShowAddRole] = useState(false);
   const [subscribe, unsubscribe, send] = useContext(WebSocketContext);
+  const [rowShowRemove, setRowShowRemove] = useState<number | null>();
+  const timeoutRef = useRef<number | null>(null);
 
   const handleAddRole = (role: Role) => {
     send({
@@ -31,6 +34,23 @@ export function RoleList({
     });
 
     setShowAddRole(false);
+  };
+
+  const handleRowClick = (index: number) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    setRowShowRemove(index);
+
+    timeoutRef.current = setTimeout(() => {
+      setRowShowRemove(null);
+    }, 5000);
+  };
+
+  const handleRemoveRole = (index: number) => {
+    send({
+      type: MessageType.REMOVE_ROLE,
+      data: index,
+    });
   };
 
   return (
@@ -45,11 +65,11 @@ export function RoleList({
           </ListHeadItem>
         ) : (
           <>
-            <ListHeadItem className=" font-semibold py-1 md:py-2 md:border-b-1 md:border-0 border-t border-gray-300">
+            <ListHeadItem className=" pl-12 text-start font-semibold py-1 md:py-2 md:border-b-1 md:border-0 border-t border-gray-300">
               Role
             </ListHeadItem>
-            <ListHeadItem className=" font-semibold md:border-b-1 md:border-0 border-t border-gray-300">
-              Team
+            <ListHeadItem className=" pl-2 text-start  font-semibold md:border-b-1 md:border-0 border-t border-gray-300">
+              Allegiance
             </ListHeadItem>
           </>
         )}
@@ -90,8 +110,9 @@ export function RoleList({
           <>
             {roles.map((role, index) => (
               <ListRow
-                className="h-[16px] border-t border-gray-300 hover:bg-gray-300 cursor-pointer"
+                className="h-[16px] border-t border-gray-300 group relative"
                 key={index}
+                onClick={() => handleRowClick(index)}
               >
                 <ListRowItem>
                   <img
@@ -100,7 +121,18 @@ export function RoleList({
                   />
                   {role.name}
                 </ListRowItem>
-                <ListRowItem>{role.allegiance.name}</ListRowItem>
+                <ListRowItem className={` p-2 ${role.allegiance.color}`}>
+                  {role.allegiance.name}
+                </ListRowItem>
+                <td
+                  className={
+                    "group-hover:block group-focus-within:block absolute right-3 bottom-0 top-0 mt-auto mb-auto h-5 w-5 cursor-pointer " +
+                    (index == rowShowRemove ? " block" : "hidden")
+                  }
+                  onClick={() => handleRemoveRole(index)}
+                >
+                  <IoCloseOutline size={20} />
+                </td>
               </ListRow>
             ))}
             {roles.length < numPlayers && isHost && (

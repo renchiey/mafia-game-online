@@ -7,6 +7,7 @@ import {
   handleClose,
   handleJoinRoom,
   handleLeaveRoom,
+  handleRemoveRole,
   handleSendRoles,
   handleSendUpdate,
   handleSetName,
@@ -56,7 +57,10 @@ wss.on("connection", (ws) => {
           handleSendRoles(clientId, ws);
           break;
         case MessageType.ADD_ROLE:
-          handleAddRole(clientId, ws, data);
+          handleAddRole(clientId, data);
+          break;
+        case MessageType.REMOVE_ROLE:
+          handleRemoveRole(clientId, data);
           break;
         case MessageType.LEAVE_ROOM:
           handleLeaveRoom(clientId);

@@ -13,6 +13,7 @@ import {
   getRoom,
   joinRoom,
   removePlayer,
+  removeRole,
   setName,
 } from "./gameHandlers";
 import { ROLES } from "../utils/roles";
@@ -142,7 +143,7 @@ export function handleSendRoles(clientId: string, ws: WebSocket) {
   }
 }
 
-export function handleAddRole(clientId: string, ws: WebSocket, data: any) {
+export function handleAddRole(clientId: string, data: Message) {
   if (!instanceOfRole(data.data)) {
     console.log(
       "[SERVER ERR]: Sent role format does not match role format on server."
@@ -154,6 +155,21 @@ export function handleAddRole(clientId: string, ws: WebSocket, data: any) {
   addRole(clients.get(clientId)?.roomId as string, data.data);
 
   broadcastStateToRoom(clients.get(clientId)?.roomId as string);
+}
+
+export function handleRemoveRole(clientId: string, data: Message) {
+  if (typeof data.data !== "number") {
+    console.log("[SERVER ERR]: Sent data is not a number.");
+    return;
+  }
+
+  const roomId = clients.get(clientId)?.roomId as string;
+
+  if (!removeRole(roomId, data.data)) {
+    console.log(`[SERVER ERR]: index ${data.data} is invalid`);
+  }
+
+  broadcastStateToRoom(roomId);
 }
 
 function broadcastStateToRoom(roomId: string | undefined) {

@@ -75,6 +75,7 @@ export enum MessageType {
   CHANGE_SETTIING = "change-settings",
   SET_NAME = "set-name",
   ADD_ROLE = "add-role",
+  REMOVE_ROLE = "remove-role",
 
   // Server Events
   JOINED_ROOM = "joined-room",

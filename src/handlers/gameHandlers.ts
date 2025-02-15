@@ -80,18 +80,24 @@ export function removePlayer(clientId: string, roomId: string) {
     .get(roomId)
     ?.players.splice(index as number, 1) as Player[];
 
+  if (!room) return;
+
   // closing room
-  if (room?.players.length == 0) {
+  if (room.players.length == 0) {
     rooms.delete(roomId);
     console.log(`[SERVER EVENT] Room ${roomId} has closed.`);
     return;
   }
 
   // setting new host
-  if (player.clientId === room?.host) {
+  if (player.clientId === room.host) {
     const id = room.players[0].clientId;
 
     room.host = id;
+  }
+
+  if (room.players.length < room.rolesPool.length) {
+    room.rolesPool.pop();
   }
 }
 
@@ -123,4 +129,14 @@ export function addRole(roomId: string, role: Role) {
     }
     return 0;
   });
+}
+
+export function removeRole(roomId: string, index: number) {
+  const room = rooms.get(roomId) as Room;
+
+  if (index < 0 || index >= room?.rolesPool.length) {
+    return null;
+  }
+
+  return room.rolesPool.splice(index, 1)[0];
 }

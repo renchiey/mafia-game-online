@@ -4,7 +4,8 @@ import { MessageType, Player, Role, Room } from "../../types";
 import { Lobby } from "../lobby";
 
 export function Game() {
-  const [subscribe, unsubscribe, send] = useContext(WebSocketContext);
+  const [subscribe, unsubscribe, send, connected] =
+    useContext(WebSocketContext);
   const [players, setPlayers] = useState<Player[]>([]);
   const [rolesPool, setRolesPool] = useState<Role[]>([]);
   const [playerId, setPlayerId] = useState<string>("");
@@ -15,6 +16,10 @@ export function Game() {
     // Get initial room data
     send({ type: MessageType.GET_STATE });
   }, []);
+
+  useEffect(() => {
+    if (!connected) window.location.href = import.meta.env.BASE_URL;
+  }, [connected]);
 
   useEffect(() => {
     const channelName = MessageType.STATE_UPDATE;

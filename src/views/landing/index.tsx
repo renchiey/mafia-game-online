@@ -4,6 +4,7 @@ import { Button } from "../../components/Button";
 import { WebSocketContext } from "../../contexts/WSContext";
 import { MessageType } from "../../types";
 import { changeURL } from "../../utils/helper";
+import { DisconnectedModal } from "../../components/DisconnectedModal";
 
 interface LandingProps {
   roomId?: string;
@@ -14,6 +15,7 @@ export function Landing({ roomId }: LandingProps) {
   const [errorMessage, setErrorMessage] = useState("");
   const [subscribe, unsubscribe, send, connected] =
     useContext<any>(WebSocketContext);
+  const [showDisconnectModal, setShowDisconnectModal] = useState(false);
 
   useEffect(() => {
     const channel = MessageType.INVALID_ROOM;
@@ -24,6 +26,18 @@ export function Landing({ roomId }: LandingProps) {
       unsubscribe(channel);
     };
   }, [subscribe, unsubscribe]);
+
+  useEffect(() => {
+    if (!connected) {
+      setShowDisconnectModal(true);
+
+      setTimeout(() => {
+        setShowDisconnectModal(false);
+      }, 5000);
+    } else {
+      setShowDisconnectModal(false);
+    }
+  }, [connected]);
 
   const handleJoinGame = () => {
     if (!connected) {
@@ -77,6 +91,8 @@ export function Landing({ roomId }: LandingProps) {
       <Button onClick={handleJoinGame}>Join Game</Button>
       <Button onClick={handleCreateGame}>Create Game</Button>
       <div className=" h-[16px] text-red-500">{errorMessage}</div>
+
+      <DisconnectedModal show={showDisconnectModal} />
     </div>
   );
 }

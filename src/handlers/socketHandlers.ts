@@ -15,6 +15,7 @@ import {
   removePlayer,
   removeRole,
   setName,
+  settingOptions,
 } from "./gameHandlers";
 import { ROLES } from "../utils/roles";
 import { instanceOfRole } from "../utils/typeCheck";
@@ -27,21 +28,20 @@ export function onConnection(clientId: string, ws: WebSocket) {
   console.log(`[SERVER EVENT] Client connected with ID: ${clientId}`);
 }
 
-export function handleSetName(clientId: string, data: Message) {
-  try {
-    setName(clientId, data);
+export function handleSetName(clientId: string, message: Message) {
+  const roomId = clients.get(clientId)?.roomId;
+  if (!roomId) throw Error("Client is not in a room.");
 
-    console.log(
-      `[SERVER EVENT] Client ${clientId} has set their username to: ${data.data}`
-    );
+  setName(clientId, message);
 
-    broadcastStateToRoom(clients.get(clientId)?.roomId);
-  } catch (error) {
-    console.error("Error setting name:", error);
-  }
+  broadcastStateToRoom(roomId);
 }
 
-export function handleJoinRoom(clientId: string, ws: WebSocket, data: Message) {
+export function handleJoinRoom(
+  clientId: string,
+  ws: WebSocket,
+  message: Message
+) {
   const player: Player = {
     clientId,
   };
@@ -49,24 +49,23 @@ export function handleJoinRoom(clientId: string, ws: WebSocket, data: Message) {
   let roomId;
 
   try {
-    if (data.type == MessageType.JOIN_ROOM && !data.data)
+    if (message.type == MessageType.JOIN_ROOM && !message.data)
       throw new Error("RoomId is required to join a room.");
 
-    if (data.type == MessageType.JOIN_ROOM) {
-      if (!joinRoom(player, data.data)) {
-        ws.send(
-          JSON.stringify({
-            type: MessageType.INVALID_ROOM,
-            data: "RoomId could not be found.",
-          })
-        );
+    if (message.type == MessageType.JOIN_ROOM) {
+      if (!joinRoom(player, message.data)) {
+        sendMessage(ws, {
+          type: MessageType.INVALID_ROOM,
+          data: "RoomId could not be found.",
+        });
+
         return;
       }
 
-      roomId = data.data;
+      roomId = message.data;
     }
 
-    if (data.type == MessageType.CREATE_ROOM) {
+    if (message.type == MessageType.CREATE_ROOM) {
       roomId = generateEmptyRoom(player);
     }
 
@@ -84,32 +83,26 @@ export function handleJoinRoom(clientId: string, ws: WebSocket, data: Message) {
 }
 
 export function handleLeaveRoom(clientId: string) {
-  try {
-    const roomId = clients.get(clientId)?.roomId;
+  const roomId = clients.get(clientId)?.roomId;
 
-    if (!roomId) throw new Error("Player is not in a room.");
+  if (!roomId) throw Error("Client is not in a room.");
 
-    removePlayer(clientId, roomId);
+  removePlayer(clientId, roomId);
 
-    if (getRoom(roomId)) broadcastStateToRoom(roomId);
-  } catch (error) {
-    console.error("Error leaving game:", error);
-  }
+  if (getRoom(roomId)) broadcastStateToRoom(roomId);
 }
 
 export function handleClose(clientId: string) {
   const roomId = clients.get(clientId)?.roomId;
 
-  if (roomId) {
-    handleLeaveRoom(clientId);
-  }
+  if (roomId) handleLeaveRoom(clientId);
 
   clients.delete(clientId);
 
   console.log(`[SERVER EVENT] Client ${clientId} has disconnected.`);
 }
 
-export function handleSendUpdate(clientId: string, ws: WebSocket) {
+export function handleGet(clientId: string, ws: WebSocket, message: Message) {
   const roomId = clients.get(clientId)?.roomId;
 
   if (!roomId) {
@@ -117,34 +110,39 @@ export function handleSendUpdate(clientId: string, ws: WebSocket) {
     return;
   }
 
-  const room = getRoom(roomId);
+  let msg_out: Message;
 
-  if (ws.readyState === WebSocket.OPEN) {
-    ws.send(
-      JSON.stringify({
-        type: MessageType.STATE_UPDATE,
-        data: {
-          roomData: room,
-          clientId: clientId,
-        },
-      })
-    );
-  }
-}
-
-export function handleSendRoles(clientId: string, ws: WebSocket) {
-  if (ws.readyState === WebSocket.OPEN) {
-    ws.send(
-      JSON.stringify({
+  switch (message.type) {
+    case MessageType.GET_ROLES:
+      msg_out = {
         type: MessageType.ROLES,
         data: ROLES,
-      })
-    );
+      };
+      break;
+    case MessageType.GET_STATE:
+      msg_out = {
+        type: MessageType.STATE,
+        data: {
+          room: getRoom(roomId),
+          clientId: clientId,
+        },
+      };
+      break;
+    case MessageType.GET_SETTING_OPTS:
+      msg_out = {
+        type: MessageType.SETTING_OPTS,
+        data: settingOptions,
+      };
+      break;
+    default:
+      throw new Error("Invalid message type.");
   }
+
+  sendMessage(ws, msg_out);
 }
 
-export function handleAddRole(clientId: string, data: Message) {
-  if (!instanceOfRole(data.data)) {
+export function handleAddRole(clientId: string, message: Message) {
+  if (!instanceOfRole(message.data)) {
     console.log(
       "[SERVER ERR]: Sent role format does not match role format on server."
     );
@@ -152,27 +150,27 @@ export function handleAddRole(clientId: string, data: Message) {
     return;
   }
 
-  addRole(clients.get(clientId)?.roomId as string, data.data);
+  addRole(clients.get(clientId)?.roomId as string, message.data);
 
   broadcastStateToRoom(clients.get(clientId)?.roomId as string);
 }
 
-export function handleRemoveRole(clientId: string, data: Message) {
-  if (typeof data.data !== "number") {
+export function handleRemoveRole(clientId: string, message: Message) {
+  if (typeof message.data !== "number") {
     console.log("[SERVER ERR]: Sent data is not a number.");
     return;
   }
 
   const roomId = clients.get(clientId)?.roomId as string;
 
-  if (!removeRole(roomId, data.data)) {
-    console.log(`[SERVER ERR]: index ${data.data} is invalid`);
+  if (!removeRole(roomId, message.data)) {
+    console.log(`[SERVER ERR]: index ${message.data} is invalid`);
   }
 
   broadcastStateToRoom(roomId);
 }
 
-function broadcastStateToRoom(roomId: string | undefined) {
+function broadcastStateToRoom(roomId: string) {
   if (!roomId) return;
 
   const room = getRoom(roomId);
@@ -181,18 +179,33 @@ function broadcastStateToRoom(roomId: string | undefined) {
 
   room.players.forEach((player) => {
     const client = (clients.get(player.clientId) as Client).ws;
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(
-        JSON.stringify({
-          type: MessageType.STATE_UPDATE,
-          data: {
-            roomData: room,
-            clientId: player.clientId,
-          },
-        })
-      );
-    }
+
+    sendMessage(client, {
+      type: MessageType.STATE,
+      data: {
+        room: room,
+        clientId: player.clientId,
+      },
+    });
   });
+}
+
+function broadcastToRoom(roomId: string, message: Message) {
+  const room = getRoom(roomId);
+
+  if (!room) throw new Error("Invalid roomId.");
+
+  room.players.forEach((player) => {
+    const client = (clients.get(player.clientId) as Client).ws;
+
+    sendMessage(client, message);
+  });
+}
+
+function sendMessage(client: WebSocket, message: Message) {
+  if (client.readyState === WebSocket.OPEN) {
+    client.send(JSON.stringify(message));
+  }
 }
 
 export function getClientRoomId(clientId: string) {

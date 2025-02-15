@@ -5,11 +5,10 @@ import { Message, MessageType } from "./types";
 import {
   handleAddRole,
   handleClose,
+  handleGet,
   handleJoinRoom,
   handleLeaveRoom,
   handleRemoveRole,
-  handleSendRoles,
-  handleSendUpdate,
   handleSetName,
   onConnection,
 } from "./handlers/socketHandlers";
@@ -31,42 +30,40 @@ wss.on("connection", (ws) => {
 
   ws.on("message", (message: string) => {
     try {
-      const data: Message = JSON.parse(message);
+      const msg: Message = JSON.parse(message);
 
-      if (!data.type) throw new Error("Invalid message received.");
+      if (!msg.type) throw new Error("Invalid message received.");
 
       console.log(
-        `[CLIENT MSG]: client ${clientId} sent a message of type: ${data.type}`
+        `[CLIENT MSG]: client ${clientId} sent a message of type: ${msg.type}`
       );
 
-      switch (data.type) {
+      switch (msg.type) {
         case MessageType.SET_NAME:
-          handleSetName(clientId, data);
+          handleSetName(clientId, msg);
           break;
         case MessageType.JOIN_ROOM:
-          if (!data.data) throw new Error("No roomId provided.");
-          handleJoinRoom(clientId, ws, data);
+          handleJoinRoom(clientId, ws, msg);
           break;
         case MessageType.CREATE_ROOM:
-          handleJoinRoom(clientId, ws, data);
+          handleJoinRoom(clientId, ws, msg);
           break;
         case MessageType.GET_STATE:
-          handleSendUpdate(clientId, ws);
-          break;
         case MessageType.GET_ROLES:
-          handleSendRoles(clientId, ws);
+        case MessageType.GET_SETTING_OPTS:
+          handleGet(clientId, ws, msg);
           break;
         case MessageType.ADD_ROLE:
-          handleAddRole(clientId, data);
+          handleAddRole(clientId, msg);
           break;
         case MessageType.REMOVE_ROLE:
-          handleRemoveRole(clientId, data);
+          handleRemoveRole(clientId, msg);
           break;
         case MessageType.LEAVE_ROOM:
           handleLeaveRoom(clientId);
           break;
         default:
-          throw new Error(`Unknown event type: ${data.type}`);
+          throw new Error(`Unknown event type: ${msg.type}`);
       }
     } catch (error) {
       console.error("Error processing message:", error);

@@ -1,7 +1,19 @@
-import { GamePhase, Message, Player, Role, Room } from "../types";
+import {
+  GamePhase,
+  Message,
+  Player,
+  Role,
+  Room,
+  SettingsOptions,
+} from "../types";
 import { getClientRoomId } from "./socketHandlers";
 
 const rooms = new Map<string, Room>();
+
+export const settingOptions: SettingsOptions = {
+  maxPlayers: [4, 5, 6, 7, 8, 9, 10, 11, 12],
+  roundSpeed: [1, 1.25, 1.5, 1.75, 2],
+};
 
 export function setName(clientId: string, data: Message) {
   // processing name
@@ -49,7 +61,8 @@ export function generateEmptyRoom(host: Player) {
     settings: {
       maxPlayers: 10, // Default max players
       roundSpeed: 1, // default round speed (multiplier value)
-      roles: [],
+      revealRoleAfterDeath: false,
+      narrator: true,
     },
   };
 
@@ -101,10 +114,6 @@ export function removePlayer(clientId: string, roomId: string) {
   }
 }
 
-export function getRoom(roomId: string) {
-  return rooms.get(roomId);
-}
-
 export function addRole(roomId: string, role: Role) {
   const room = rooms.get(roomId);
 
@@ -139,4 +148,9 @@ export function removeRole(roomId: string, index: number) {
   }
 
   return room.rolesPool.splice(index, 1)[0];
+}
+
+// for socket handler
+export function getRoom(roomId: string) {
+  return rooms.get(roomId);
 }

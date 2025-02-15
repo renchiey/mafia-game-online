@@ -21,7 +21,13 @@ export interface Player {
 export interface Settings {
   maxPlayers: number;
   roundSpeed: number;
-  roles: Role[];
+  revealRoleAfterDeath: boolean;
+  narrator: boolean;
+}
+
+export interface SettingsOptions {
+  maxPlayers: number[];
+  roundSpeed: number[];
 }
 
 export enum GamePhase {
@@ -63,9 +69,12 @@ export enum MessageType {
   GET_PLAYERS = "get-players",
   GET_CLIENTID = "get-clientid",
   GET_ROLES = "get-roles",
+  GET_SETTING_OPTS = "get-setting-opts",
 
-  // Data
+  // Server return data
   ROLES = "roles",
+  STATE = "state",
+  SETTING_OPTS = "setting-opts",
 
   // Client Events
   CREATE_ROOM = "create-room",
@@ -85,5 +94,4 @@ export enum MessageType {
   GAME_STARTED = "game-started",
   GAME_ENDED = "game-ended",
   SERVER_ERR = "server-error",
-  STATE_UPDATE = "state-update",
 }

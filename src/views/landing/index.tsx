@@ -4,7 +4,8 @@ import { Button } from "../../components/Button";
 import { WebSocketContext } from "../../contexts/WSContext";
 import { MessageType } from "../../types";
 import { changeURL } from "../../utils/helper";
-import { DisconnectedModal } from "../../components/DisconnectedModal";
+import { PopupMessage } from "../../components/PopupMessage";
+import { Modal } from "../../components/Modal";
 
 interface LandingProps {
   roomId?: string;
@@ -16,23 +17,36 @@ export function Landing({ roomId }: LandingProps) {
   const [subscribe, unsubscribe, send, connected] =
     useContext<any>(WebSocketContext);
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
+  const [showKickedModal, setShowKickedModal] = useState(false);
+  const [showReconnectPopup, setShowReconnectPopup] = useState(false);
 
   useEffect(() => {
-    const channel = MessageType.INVALID_ROOM;
+    subscribe(MessageType.INVALID_ROOM, () =>
+      displayError("Invalid room code.")
+    );
 
-    subscribe(channel, () => displayError("Invalid room code."));
+    // TODO: move to lobby (landing is not rendered when player is in lobby)
+    subscribe(MessageType.KICKED, () => setShowKickedModal(true));
 
     return () => {
-      unsubscribe(channel);
+      unsubscribe(MessageType.INVALID_ROOM);
     };
   }, [subscribe, unsubscribe]);
 
   useEffect(() => {
+    let timer: number | undefined;
     if (!connected) {
       setShowDisconnectModal(true);
     } else {
       setShowDisconnectModal(false);
+
+      setShowReconnectPopup(true);
+      timer = setTimeout(() => setShowReconnectPopup(false), 4000);
     }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [connected]);
 
   const handleJoinGame = () => {
@@ -92,10 +106,27 @@ export function Landing({ roomId }: LandingProps) {
       </div>
       <div className=" h-[16px] text-red-500">{errorMessage}</div>
 
-      <DisconnectedModal
+      <Modal
         show={showDisconnectModal}
         closeModal={() => setShowDisconnectModal(false)}
-      />
+      >
+        <h2 className="text-lg font-semibold text-red-600">Disconnected</h2>
+        <p className="text-gray-600 mt-2">
+          You have lost connection to the server.
+        </p>
+      </Modal>
+      <Modal
+        show={showKickedModal}
+        closeModal={() => setShowKickedModal(false)}
+      >
+        <h2 className="text-lg font-semibold text-red-600">Disconnected</h2>
+        <p className="text-gray-600 mt-2">You have been kicked from the room</p>
+      </Modal>
+      {showReconnectPopup && (
+        <PopupMessage>
+          <div className=" text-green-600 ">Connected to server.</div>
+        </PopupMessage>
+      )}
     </div>
   );
 }

@@ -4,7 +4,7 @@ interface ButtonProps {
   className?: string;
 }
 
-export function Button({ children, onClick, className }: ButtonProps) {
+export const Button = ({ children, onClick, className }: ButtonProps) => {
   return (
     <button
       className={
@@ -18,4 +18,4 @@ export function Button({ children, onClick, className }: ButtonProps) {
       {children}
     </button>
   );
-}
+};

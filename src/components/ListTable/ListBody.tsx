@@ -5,6 +5,6 @@ interface ListBody {
   children: ReactNode;
 }
 
-export function ListBody({ className, children }: ListBody) {
+export const ListBody = ({ className, children }: ListBody) => {
   return <tbody className={className ? className : ""}>{children}</tbody>;
-}
+};

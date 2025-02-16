@@ -4,10 +4,10 @@ interface ListHeadProps {
   children: ReactNode;
 }
 
-export function ListHead({ children }: ListHeadProps) {
+export const ListHead = ({ children }: ListHeadProps) => {
   return (
     <thead>
       <tr>{children}</tr>
     </thead>
   );
-}
+};

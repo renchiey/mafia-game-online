@@ -4,7 +4,7 @@ import { MessageType, Player, Role, Settings } from "../../types";
 import { WebSocketContext } from "../../contexts/WSContext";
 import { PlayerList } from "../../components/PlayersList/PlayerList";
 import { RoleList } from "../../components/RolesList/RoleList";
-import { SettingsMenu } from "../../components/SettingsMenu";
+import SettingsWidget from "../../components/SettingsWidget/SettingsWidget";
 
 interface LobbyProps {
   players: Player[];
@@ -59,7 +59,7 @@ export function Lobby({
         <Button onClick={handleCopyLink}>copy invite link</Button>
         <p className=" text-center h-[16px]">{copyFeedback}</p>
       </div>
-      <div className=" flex gap-5 md:gap-30  md:flex-row flex-col">
+      <div className=" flex w-full gap-5 md:gap-20  md:flex-row flex-col flex-wrap justify-center items-center">
         <PlayerList players={players} hostId={hostId} playerId={playerId} />
         <RoleList
           roles={roles}
@@ -67,17 +67,19 @@ export function Lobby({
           numPlayers={players.length}
           isHost={playerId === hostId}
         />
+        <SettingsWidget
+          isHost={
+            playerId.length > 0 && hostId.length > 0 && playerId === hostId
+          }
+          settings={settings}
+          numPlayers={players.length}
+        />
       </div>
-
-      <SettingsMenu
-        isHost={playerId.length > 0 && hostId.length > 0 && playerId === hostId}
-        settings={settings}
-      />
 
       <div className="flex mt-10">
         <Button
           className={
-            " py-2 px-4 border-2 rounded-xl " +
+            " py-2 px-4 border-2 rounded-xl mb-5" +
             (playerId === hostId
               ? " border-white hover:bg-red-800 active:bg-red-800 cursor-pointer "
               : "border-gray-400 text-gray-400 cursor-not-allowed")

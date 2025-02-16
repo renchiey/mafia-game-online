@@ -6,7 +6,7 @@ interface ToggleButtonProps {
   text: string;
 }
 
-export function ToggleButton({ isOpen, onClick, text }: ToggleButtonProps) {
+export const ToggleButton = ({ isOpen, onClick, text }: ToggleButtonProps) => {
   return (
     <button
       className="md:hidden w-full p-2 rounded-xl relative font-semibold"
@@ -22,4 +22,4 @@ export function ToggleButton({ isOpen, onClick, text }: ToggleButtonProps) {
       </span>
     </button>
   );
-}
+};

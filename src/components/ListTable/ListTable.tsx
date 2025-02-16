@@ -6,7 +6,7 @@ interface ListProps {
   toggleBtnText: string;
 }
 
-export function ListTable({ children, toggleBtnText }: ListProps) {
+export const ListTable = ({ children, toggleBtnText }: ListProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -23,4 +23,4 @@ export function ListTable({ children, toggleBtnText }: ListProps) {
       </div>
     </div>
   );
-}
+};

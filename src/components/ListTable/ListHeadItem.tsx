@@ -6,7 +6,11 @@ interface ListHeadItemProps {
   span?: number;
 }
 
-export function ListHeadItem({ children, className, span }: ListHeadItemProps) {
+export const ListHeadItem = ({
+  children,
+  className,
+  span,
+}: ListHeadItemProps) => {
   return (
     <th
       colSpan={span}
@@ -15,4 +19,4 @@ export function ListHeadItem({ children, className, span }: ListHeadItemProps) {
       {children}
     </th>
   );
-}
+};

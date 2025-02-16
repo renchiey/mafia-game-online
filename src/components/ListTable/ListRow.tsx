@@ -6,7 +6,7 @@ interface ListRowProps {
   onClick?: () => void;
 }
 
-export function ListRow({ children, className, onClick }: ListRowProps) {
+export const ListRow = ({ children, className, onClick }: ListRowProps) => {
   return (
     <tr
       className={className ? className : "h-[16px] border-t  border-gray-300"}
@@ -15,4 +15,4 @@ export function ListRow({ children, className, onClick }: ListRowProps) {
       {children}
     </tr>
   );
-}
+};

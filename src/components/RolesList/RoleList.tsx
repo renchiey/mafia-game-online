@@ -16,12 +16,12 @@ interface RoleListProps {
   isHost: boolean;
 }
 
-export function RoleList({
+export const RoleList = ({
   roles,
   numPlayers,
   availableRoles,
   isHost,
-}: RoleListProps) {
+}: RoleListProps) => {
   const [showAddRole, setShowAddRole] = useState(false);
   const [subscribe, unsubscribe, send] = useContext(WebSocketContext);
   const [rowShowRemove, setRowShowRemove] = useState<number | null>();
@@ -157,4 +157,4 @@ export function RoleList({
       </ListBody>
     </ListTable>
   );
-}
+};

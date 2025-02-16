@@ -7,12 +7,12 @@ interface ListRowItemProps {
   children: ReactNode;
 }
 
-export function ListRowItem({
+export const ListRowItem = ({
   className,
   children,
   span,
   onClick,
-}: ListRowItemProps) {
+}: ListRowItemProps) => {
   return (
     <td
       onClick={onClick}
@@ -22,4 +22,4 @@ export function ListRowItem({
       {children}
     </td>
   );
-}
+};

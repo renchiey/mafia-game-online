@@ -28,9 +28,7 @@ export function Game() {
   }, [connected]);
 
   useEffect(() => {
-    const channelName = MessageType.STATE;
-
-    subscribe(channelName, (data: any) => {
+    subscribe(MessageType.STATE, (data: any) => {
       const { room, clientId } = data;
 
       console.log("data", data);
@@ -42,6 +40,8 @@ export function Game() {
       setHostId((room as Room).host);
       setRoomId((room as Room).roomId);
     });
+
+    return () => unsubscribe(MessageType.STATE);
   }, [subscribe, unsubscribe]);
 
   return (

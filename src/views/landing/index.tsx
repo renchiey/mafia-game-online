@@ -17,16 +17,12 @@ export function Landing({ roomId }: LandingProps) {
   const [subscribe, unsubscribe, send, connected] =
     useContext<any>(WebSocketContext);
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
-  const [showKickedModal, setShowKickedModal] = useState(false);
   const [showReconnectPopup, setShowReconnectPopup] = useState(false);
 
   useEffect(() => {
     subscribe(MessageType.INVALID_ROOM, () =>
       displayError("Invalid room code.")
     );
-
-    // TODO: move to lobby (landing is not rendered when player is in lobby)
-    subscribe(MessageType.KICKED, () => setShowKickedModal(true));
 
     return () => {
       unsubscribe(MessageType.INVALID_ROOM);
@@ -114,13 +110,6 @@ export function Landing({ roomId }: LandingProps) {
         <p className="text-gray-600 mt-2">
           You have lost connection to the server.
         </p>
-      </Modal>
-      <Modal
-        show={showKickedModal}
-        closeModal={() => setShowKickedModal(false)}
-      >
-        <h2 className="text-lg font-semibold text-red-600">Disconnected</h2>
-        <p className="text-gray-600 mt-2">You have been kicked from the room</p>
       </Modal>
       {showReconnectPopup && (
         <PopupMessage>

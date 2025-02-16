@@ -5,6 +5,7 @@ import { WebSocketContext } from "../../contexts/WSContext";
 import { PlayerList } from "../../components/PlayersList/PlayerList";
 import { RoleList } from "../../components/RolesList/RoleList";
 import SettingsWidget from "../../components/SettingsWidget/SettingsWidget";
+import { Modal } from "../../components/Modal";
 
 interface LobbyProps {
   players: Player[];
@@ -26,6 +27,7 @@ export function Lobby({
   const [copyFeedback, setCopyFeedback] = useState("");
   const [subscribe, unsubscribe, send] = useContext(WebSocketContext);
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
+  const [showKickedModal, setShowKickedModal] = useState(false);
 
   useEffect(() => {
     if (playerId && hostId && playerId === hostId)
@@ -33,14 +35,19 @@ export function Lobby({
   }, [playerId, hostId]);
 
   useEffect(() => {
-    const channel = "roles";
-
-    subscribe(channel, (data: Role[]) => {
+    subscribe(MessageType.ROLES, (data: Role[]) => {
       setAvailableRoles(data);
       console.log(data);
     });
 
-    return () => unsubscribe(channel);
+    subscribe(MessageType.KICKED, () => setShowKickedModal(true));
+
+    subscribe(MessageType.SERVER_ERROR, () => setShowKickedModal(true));
+
+    return () => {
+      unsubscribe(MessageType.ROLES);
+      unsubscribe(MessageType.SERVER_ERROR);
+    };
   }, [subscribe, unsubscribe]);
 
   const handleCopyLink = () => {
@@ -51,6 +58,10 @@ export function Lobby({
     setTimeout(() => {
       setCopyFeedback("");
     }, 2000);
+  };
+
+  const handleCloseModal = () => {
+    window.location.href = import.meta.env.BASE_URL;
   };
 
   return (
@@ -88,6 +99,10 @@ export function Lobby({
           Start Game
         </Button>
       </div>
+      <Modal show={showKickedModal} closeModal={() => handleCloseModal()}>
+        <h2 className="text-lg font-semibold text-red-600">Disconnected</h2>
+        <p className="text-gray-600 mt-2">You have been kicked from the room</p>
+      </Modal>
     </div>
   );
 }

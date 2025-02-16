@@ -7,7 +7,7 @@ import {
   Settings,
   SettingsOptions,
 } from "../types";
-import { getClientRoomId } from "./socketHandlers";
+import { getClientRoomId, removeClientFromRoom } from "./socketHandlers";
 
 const rooms = new Map<string, Room>();
 
@@ -93,6 +93,8 @@ export function removePlayer(clientId: string, roomId: string) {
   const [player] = rooms
     .get(roomId)
     ?.players.splice(index as number, 1) as Player[];
+
+  removeClientFromRoom(player.clientId);
 
   if (!room) return;
 

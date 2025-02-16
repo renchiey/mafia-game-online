@@ -235,3 +235,7 @@ function sendMessage(client: WebSocket, message: Message) {
 export function getClientRoomId(clientId: string) {
   return clients.get(clientId)?.roomId;
 }
+
+export function removeClientFromRoom(clientId: string) {
+  (clients.get(clientId) as Client).roomId = undefined;
+}

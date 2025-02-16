@@ -9,6 +9,7 @@ import {
 } from "../types";
 import {
   addRole,
+  changeSettings,
   generateEmptyRoom,
   getRoom,
   joinRoom,
@@ -18,7 +19,7 @@ import {
   settingOptions,
 } from "./gameHandlers";
 import { ROLES } from "../utils/roles";
-import { instanceOfRole } from "../utils/typeCheck";
+import { instanceOfRole, instanceOfSettings } from "../utils/typeCheck";
 
 const clients = new Map<string, Client>();
 
@@ -90,6 +91,18 @@ export function handleLeaveRoom(clientId: string) {
   removePlayer(clientId, roomId);
 
   if (getRoom(roomId)) broadcastStateToRoom(roomId);
+}
+
+export function handleKickClient(message: Message) {
+  const clientId = message.data;
+  if (typeof clientId !== "string") throw Error("Sent data is not a string");
+
+  handleLeaveRoom(clientId);
+
+  sendMessage(clients.get(clientId)?.ws as WebSocket, {
+    type: MessageType.KICKED,
+    data: "",
+  });
 }
 
 export function handleClose(clientId: string) {
@@ -188,6 +201,17 @@ function broadcastStateToRoom(roomId: string) {
       },
     });
   });
+}
+
+export function handleChangeSettings(clientId: string, msg: Message) {
+  if (!instanceOfSettings(msg.data)) throw new Error("Invalid message.");
+
+  const roomId = clients.get(clientId)?.roomId;
+
+  if (!roomId) throw new Error("Client not in room.");
+
+  changeSettings(roomId, msg.data);
+  broadcastStateToRoom(roomId);
 }
 
 function broadcastToRoom(roomId: string, message: Message) {

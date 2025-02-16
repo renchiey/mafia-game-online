@@ -4,6 +4,7 @@ import {
   Player,
   Role,
   Room,
+  Settings,
   SettingsOptions,
 } from "../types";
 import { getClientRoomId } from "./socketHandlers";
@@ -148,6 +149,12 @@ export function removeRole(roomId: string, index: number) {
   }
 
   return room.rolesPool.splice(index, 1)[0];
+}
+
+export function changeSettings(roomId: string, settings: Settings) {
+  const room = rooms.get(roomId) as Room;
+
+  room.settings = settings;
 }
 
 // for socket handler

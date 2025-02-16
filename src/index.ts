@@ -4,9 +4,11 @@ import { v4 as uuidv4 } from "uuid";
 import { Message, MessageType } from "./types";
 import {
   handleAddRole,
+  handleChangeSettings,
   handleClose,
   handleGet,
   handleJoinRoom,
+  handleKickClient,
   handleLeaveRoom,
   handleRemoveRole,
   handleSetName,
@@ -48,6 +50,9 @@ wss.on("connection", (ws) => {
         case MessageType.CREATE_ROOM:
           handleJoinRoom(clientId, ws, msg);
           break;
+        case MessageType.CHANGE_SETTIING:
+          handleChangeSettings(clientId, msg);
+          break;
         case MessageType.GET_STATE:
         case MessageType.GET_ROLES:
         case MessageType.GET_SETTING_OPTS:
@@ -61,6 +66,9 @@ wss.on("connection", (ws) => {
           break;
         case MessageType.LEAVE_ROOM:
           handleLeaveRoom(clientId);
+          break;
+        case MessageType.REMOVE_PLAYER:
+          handleKickClient(msg);
           break;
         default:
           throw new Error(`Unknown event type: ${msg.type}`);

@@ -85,6 +85,7 @@ export enum MessageType {
   SET_NAME = "set-name",
   ADD_ROLE = "add-role",
   REMOVE_ROLE = "remove-role",
+  REMOVE_PLAYER = "remove-player",
 
   // Server Events
   JOINED_ROOM = "joined-room",
@@ -94,4 +95,5 @@ export enum MessageType {
   GAME_STARTED = "game-started",
   GAME_ENDED = "game-ended",
   SERVER_ERR = "server-error",
+  KICKED = "kicked",
 }

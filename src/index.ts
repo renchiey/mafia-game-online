@@ -13,6 +13,7 @@ import {
   handleRemoveRole,
   handleSetName,
   onConnection,
+  sendMessage,
 } from "./handlers/socketHandlers";
 
 const PORT = 8080;
@@ -74,6 +75,10 @@ wss.on("connection", (ws) => {
           throw new Error(`Unknown event type: ${msg.type}`);
       }
     } catch (error) {
+      sendMessage(ws, {
+        type: MessageType.SERVER_ERROR,
+        data: "",
+      });
       console.error("Error processing message:", error);
     }
   });

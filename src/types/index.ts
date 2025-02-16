@@ -94,6 +94,6 @@ export enum MessageType {
   PLAYER_LEFT = "player-left",
   GAME_STARTED = "game-started",
   GAME_ENDED = "game-ended",
-  SERVER_ERR = "server-error",
+  SERVER_ERROR = "server-error",
   KICKED = "kicked",
 }

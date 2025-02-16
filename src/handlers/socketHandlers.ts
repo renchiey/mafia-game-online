@@ -226,7 +226,7 @@ function broadcastToRoom(roomId: string, message: Message) {
   });
 }
 
-function sendMessage(client: WebSocket, message: Message) {
+export function sendMessage(client: WebSocket, message: Message) {
   if (client.readyState === WebSocket.OPEN) {
     client.send(JSON.stringify(message));
   }

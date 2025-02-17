@@ -4,7 +4,8 @@
 Client-side source code for Mafia Online
 
 ## Technologies/libraries used
-- Vite [![My Skills](https://skillicons.dev/icons?i=js,html,css,wasm)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=vite,react,ts,tailwind)](https://skillicons.dev)
+- vite
 - React + Typescript
-- Tailwindcss
+- Tailwind
 - react-use-websocket

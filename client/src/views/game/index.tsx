@@ -1,6 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import { WebSocketContext } from "../../contexts/WSContext";
-import { MessageType, Player, Role, Room, Settings } from "../../types";
+import {
+  MessageType,
+  Player,
+  Role,
+  Room,
+  Settings,
+} from "../../../../shared/types";
 import { Lobby } from "../lobby";
 
 export function Game() {

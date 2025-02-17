@@ -6,7 +6,7 @@ import {
   Room,
   Settings,
   SettingsOptions,
-} from "../types";
+} from "../../../shared/types";
 import { getClientRoomId, removeClientFromRoom } from "./socketHandlers";
 
 const rooms = new Map<string, Room>();

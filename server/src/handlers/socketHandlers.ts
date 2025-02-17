@@ -3,10 +3,10 @@ import {
   GamePhase,
   Player,
   Room,
-  Client,
   Message,
   MessageType,
-} from "../types";
+} from "../../../shared/types";
+import { Client } from "../types";
 import {
   addRole,
   changeSettings,

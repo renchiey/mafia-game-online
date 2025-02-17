@@ -1,4 +1,5 @@
-import { Allegiance, Role } from "../types";
+import { Allegiance, Role } from "../../../shared/types";
+
 import {
   DoctorIcon,
   InvestigatorIcon,

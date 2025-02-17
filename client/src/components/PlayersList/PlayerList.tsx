@@ -1,4 +1,4 @@
-import { MessageType, Player } from "../../types";
+import { MessageType, Player } from "../../../../shared/types";
 import { ListTable } from "../ListTable/ListTable";
 import { ListRow } from "../ListTable/ListRow";
 import { ListHead } from "../ListTable/ListHead";

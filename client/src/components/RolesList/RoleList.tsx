@@ -1,4 +1,4 @@
-import { MessageType, Role } from "../../types";
+import { MessageType, Role } from "../../../../shared/types";
 import { ListTable } from "../ListTable/ListTable";
 import { ListRow } from "../ListTable/ListRow";
 import { ListHead } from "../ListTable/ListHead";

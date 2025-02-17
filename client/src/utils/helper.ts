@@ -1,4 +1,4 @@
-import { Message } from "../types";
+import { Message } from "../../../shared/types";
 
 export const validateSessionId = (sessionId: string) => {
   if (sessionId.length === 5) {

@@ -1,8 +1,58 @@
-import { WebSocket } from "ws";
+export interface Allegiance {
+  name: string;
+  color: string;
+}
 
-export interface Client {
-  ws: WebSocket;
-  roomId?: string;
+export interface Role {
+  name: string;
+  iconSrc: string;
+  allegiance: Allegiance;
+  description: string;
+}
+
+export interface Player {
+  clientId: string;
+  username?: string;
+  role?: Role;
+}
+
+export interface Settings {
+  maxPlayers: number;
+  roundSpeed: number;
+  revealRoleAfterDeath: boolean;
+  narrator: boolean;
+}
+
+export interface SettingsOptions {
+  maxPlayers: number[];
+  roundSpeed: number[];
+}
+
+export enum GamePhase {
+  NIGHT = 0,
+  DISCUSSION = 1,
+  VOTING = 2,
+  COMPLETE = 3,
+}
+
+export interface GameState {
+  round: number;
+  phase: GamePhase;
+  dead: Player[];
+}
+
+export interface Room {
+  roomId: string;
+  host: string;
+  players: Player[];
+  rolesPool: Role[];
+  gameState: GameState;
+  settings: Settings;
+}
+
+export interface Message {
+  type: MessageType;
+  data: any;
 }
 
 export enum MessageType {

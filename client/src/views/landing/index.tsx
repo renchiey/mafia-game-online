@@ -18,14 +18,31 @@ export function Landing({ roomId }: LandingProps) {
     useContext<any>(WebSocketContext);
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
   const [showReconnectPopup, setShowReconnectPopup] = useState(false);
+  const [roomIsFull, setRoomIsFull] = useState(false);
+  const [roomCodeIsValid, setRoomCodeIsValid] = useState(true);
 
   useEffect(() => {
-    subscribe(MessageType.INVALID_ROOM, () =>
-      displayError("Invalid room code.")
-    );
+    const data = roomId ? roomId : "no-room-id-provided";
+
+    send({
+      type: MessageType.CHECK_ROOM,
+      data: data,
+    });
+  }, [roomId]);
+
+  useEffect(() => {
+    subscribe(MessageType.ROOM_FULL, () => setRoomIsFull(true));
+
+    subscribe(MessageType.INVALID_ROOM, () => setRoomCodeIsValid(false));
+
+    subscribe(MessageType.ROOM_JOINABLE, () => {
+      setRoomIsFull(false);
+      setRoomCodeIsValid(true);
+    });
 
     return () => {
       unsubscribe(MessageType.INVALID_ROOM);
+      unsubscribe(MessageType.ROOM_FULL);
     };
   }, [subscribe, unsubscribe]);
 
@@ -46,12 +63,20 @@ export function Landing({ roomId }: LandingProps) {
   }, [connected]);
 
   const handleJoinGame = () => {
+    if (roomIsFull) {
+      displayError("Room is full.");
+      return;
+    }
     if (!connected) {
       displayError("Not connected to server.");
       return;
     }
     if (!roomId) {
       displayError("No invite link provided.");
+      return;
+    }
+    if (!roomCodeIsValid) {
+      displayError("Invalid room code.");
       return;
     }
 

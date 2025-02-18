@@ -5,6 +5,7 @@ import { Message, MessageType } from "../../shared/types";
 import {
   handleAddRole,
   handleChangeSettings,
+  handleCheckRoom,
   handleClose,
   handleGet,
   handleJoinRoom,
@@ -50,6 +51,9 @@ wss.on("connection", (ws) => {
           break;
         case MessageType.CREATE_ROOM:
           handleJoinRoom(clientId, ws, msg);
+          break;
+        case MessageType.CHECK_ROOM:
+          handleCheckRoom(ws, msg);
           break;
         case MessageType.CHANGE_SETTIING:
           handleChangeSettings(clientId, msg);

@@ -8,8 +8,6 @@ function App() {
   const [view, setView] = useState<ReactNode>(<Landing />);
   const [subscribe, unsubscribe] = useContext(WebSocketContext);
 
-  console.log("shit myself");
-
   useEffect(() => {
     const searchParams = location.search.split("?");
     if (searchParams.length === 2) {

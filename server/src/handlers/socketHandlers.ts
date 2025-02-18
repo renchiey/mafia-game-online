@@ -183,6 +183,35 @@ export function handleRemoveRole(clientId: string, message: Message) {
   broadcastStateToRoom(roomId);
 }
 
+export function handleCheckRoom(ws: WebSocket, msg: Message) {
+  const roomId: string = msg.data;
+
+  if (!roomId) throw new Error(`Invalid message data: ${msg.data}`);
+
+  const room = getRoom(roomId);
+
+  if (!room) {
+    sendMessage(ws, {
+      type: MessageType.INVALID_ROOM,
+      data: "",
+    });
+    return;
+  }
+
+  if (room.settings.maxPlayers === room.players.length) {
+    sendMessage(ws, {
+      type: MessageType.ROOM_FULL,
+      data: "",
+    });
+    return;
+  }
+
+  sendMessage(ws, {
+    type: MessageType.ROOM_JOINABLE,
+    data: "",
+  });
+}
+
 function broadcastStateToRoom(roomId: string) {
   if (!roomId) return;
 

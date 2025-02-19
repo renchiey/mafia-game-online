@@ -16,6 +16,10 @@ export const settingOptions: SettingsOptions = {
   roundSpeed: [1, 1.25, 1.5, 1.75, 2],
 };
 
+const TURN_TIMEOUT = 15000; // 15 second
+
+const STAGGER_TIMEOUT = 1000; // 1 second
+
 export function setName(clientId: string, data: Message) {
   // processing name
   let username = (data.data as string).trim().slice(0, 20);
@@ -56,15 +60,17 @@ export function generateEmptyRoom(host: Player) {
     rolesPool: [],
     gameState: {
       round: 0,
-      phase: GamePhase.NIGHT,
       dead: [],
+      veteranShotsRemaining: 3,
     },
     settings: {
       maxPlayers: 10, // Default max players
       roundSpeed: 1, // default round speed (multiplier value)
       revealRoleAfterDeath: false,
       narrator: true,
+      veteranShots: 3,
     },
+    gameStarted: false,
   };
 
   rooms.set(roomId, room);

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Button } from "../../components/Button";
 import { MessageType, Player, Role, Settings } from "../../../../shared/types";
 import { WebSocketContext } from "../../contexts/WSContext";
@@ -10,7 +10,7 @@ import { Modal } from "../../components/Modal";
 interface LobbyProps {
   players: Player[];
   roles: Role[];
-  settings: Settings;
+  settings?: Settings;
   hostId: string;
   playerId: string;
   roomId: string;
@@ -24,10 +24,19 @@ export function Lobby({
   playerId,
   roomId,
 }: LobbyProps) {
+  if (!settings) return null;
+
   const [copyFeedback, setCopyFeedback] = useState("");
   const [subscribe, unsubscribe, send] = useContext(WebSocketContext);
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [showKickedModal, setShowKickedModal] = useState(false);
+  const feedbackTimeoutRef = useRef<number | null>(null);
+  const testSound = new Audio("/narrator/mafioso_turn.mp3");
+
+  useEffect(() => {
+    console.log(testSound);
+    testSound.play();
+  }, []);
 
   useEffect(() => {
     if (playerId && hostId && playerId === hostId)
@@ -35,10 +44,7 @@ export function Lobby({
   }, [playerId, hostId]);
 
   useEffect(() => {
-    subscribe(MessageType.ROLES, (data: Role[]) => {
-      setAvailableRoles(data);
-      console.log(data);
-    });
+    subscribe(MessageType.ROLES, (data: Role[]) => setAvailableRoles(data));
 
     subscribe(MessageType.KICKED, () => setShowKickedModal(true));
 
@@ -53,10 +59,16 @@ export function Lobby({
   const handleCopyLink = () => {
     setCopyFeedback("Invite link copied!");
 
-    navigator.clipboard.writeText(`${import.meta.env.VITE_DEV_URL}?${roomId}`);
+    navigator.clipboard
+      .writeText(`${import.meta.env.VITE_DEV_URL}?${roomId}`)
+      .then(() => setCopyFeedback("Invite link copied!"))
+      .catch(() => setCopyFeedback("Failed to copy link."));
 
-    setTimeout(() => {
+    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+
+    feedbackTimeoutRef.current = setTimeout(() => {
       setCopyFeedback("");
+      feedbackTimeoutRef.current = null;
     }, 2000);
   };
 

@@ -21,6 +21,7 @@ export interface Settings {
   roundSpeed: number;
   revealRoleAfterDeath: boolean;
   narrator: boolean;
+  veteranShots: number;
 }
 
 export interface SettingsOptions {
@@ -37,8 +38,17 @@ export enum GamePhase {
 
 export interface GameState {
   round: number;
-  phase: GamePhase;
   dead: Player[];
+  killVoted?: string[];
+  transported?: Transported;
+  healed?: string;
+  veteranActive?: boolean;
+  veteranShotsRemaining: number;
+}
+
+export interface Transported {
+  clientOneId: string;
+  clientTwoId: string;
 }
 
 export interface Room {
@@ -48,6 +58,7 @@ export interface Room {
   rolesPool: Role[];
   gameState: GameState;
   settings: Settings;
+  gameStarted: boolean;
 }
 
 export interface Message {
@@ -86,10 +97,48 @@ export enum MessageType {
   INVALID_ROOM = "invalid-room",
   PLAYER_JOINED = "player-joined",
   PLAYER_LEFT = "player-left",
-  GAME_STARTED = "game-started",
-  GAME_ENDED = "game-ended",
   SERVER_ERROR = "server-error",
   KICKED = "kicked",
   ROOM_FULL = "room-full",
   ROOM_JOINABLE = "room-joinable",
+  GAME_IN_PROGRESS = "game-in-progress",
+
+  // Umbrella event for in-game events
+  GAME_EVENT = "game-event",
+}
+
+export interface GameMessageData {
+  type: GameMessage;
+  playerSelected: string;
+  playerSelected2?: string;
+  message?: any;
+}
+
+export enum GameMessage {
+  WAITING = "waiting",
+  START = "start",
+
+  // role turn indicators
+  MAFIOSO_TURN = "mafioso_turn",
+  INVESTIGATOR_TURN = "investigator-turn",
+  DOCTOR_TURN = "doctor-turn",
+  TRANSPORTER_TURN = "transporter-turn",
+  END_TURN = "end-turn",
+
+  // role actions
+  KILL_VOTE = "kill_vote",
+  UNDO_KILL_VOTE = "undo-kil-vote",
+  HEAL = "heal",
+  INVESTIGATE = "investigate",
+  TRANSPORT = "transport",
+
+  // phase
+  NIGHT_PHASE = "night-phase",
+  DISCUSSION_PHASE = "discussion-phase",
+  VOTING_PHASE = "voting-phase",
+
+  // end
+  MAFIA_WIN = "mafia-win",
+  TOWNS_WIN = "towns-win",
+  JESTER_WIN = "jester-win",
 }

@@ -14,12 +14,7 @@ export function Game() {
     useContext(WebSocketContext);
   const [players, setPlayers] = useState<Player[]>([]);
   const [rolesPool, setRolesPool] = useState<Role[]>([]);
-  const [settings, setSettings] = useState<Settings>({
-    maxPlayers: 1,
-    roundSpeed: 1,
-    revealRoleAfterDeath: true,
-    narrator: true,
-  });
+  const [settings, setSettings] = useState<Settings>();
   const [playerId, setPlayerId] = useState<string>("");
   const [hostId, setHostId] = useState<string>("");
   const [roomId, setRoomId] = useState<string>("");

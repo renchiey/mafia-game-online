@@ -11,7 +11,7 @@ interface WebSocketProviderProps {
 }
 
 export function WebSocketProvider({ children }: WebSocketProviderProps) {
-  const WS_URL = "ws://localhost:8080";
+  const WS_URL = "ws://192.168.1.81:8080";
   const channels = useRef<ChannelInterface>({});
   const [connected, setConnected] = useState(false);
 

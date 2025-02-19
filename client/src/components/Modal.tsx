@@ -11,7 +11,7 @@ export const Modal = ({ show, closeModal, children }: ModalProps) => {
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center  ">
+    <div className="fixed inset-0 flex items-center justify-center z-20 text-black ">
       <div className="bg-white p-6 rounded-lg shadow-lg w-80 text-center relative">
         {children}
         <div

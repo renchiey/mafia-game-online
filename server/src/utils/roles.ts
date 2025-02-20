@@ -9,22 +9,23 @@ import {
   TransportIcon,
   VeteranIcon,
 } from "./icons";
+import { colors } from "../../../shared/colors";
 
 // TailwindCSS does not allow dynamic classnames
 // therefore existing classnames must be used for color
 export const TOWNS: Allegiance = {
   name: "Towns",
-  color: "text-green-600",
+  color: colors.towns,
 };
 
 export const MAFIA: Allegiance = {
   name: "Mafia",
-  color: "text-red-600",
+  color: colors.mafia,
 };
 
 export const NEUTRAL: Allegiance = {
   name: "Neutral",
-  color: "text-gray-600",
+  color: colors.neutral,
 };
 
 export const ROLES: Role[] = [

@@ -18,6 +18,7 @@ export function Game() {
   const [playerId, setPlayerId] = useState<string>("");
   const [hostId, setHostId] = useState<string>("");
   const [roomId, setRoomId] = useState<string>("");
+  const [inGame, setInGame] = useState(false);
 
   useEffect(() => {
     // Get initial room data
@@ -42,10 +43,14 @@ export function Game() {
       setRoomId((room as Room).roomId);
     });
 
+    subscribe(MessageType.START_GAME, () => setInGame(true));
+
     return () => unsubscribe(MessageType.STATE);
   }, [subscribe, unsubscribe]);
 
-  return (
+  return inGame ? (
+    <>hello</>
+  ) : (
     <Lobby
       players={players}
       roles={rolesPool}

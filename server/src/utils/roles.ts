@@ -11,8 +11,6 @@ import {
 } from "./icons";
 import { colors } from "../../../shared/colors";
 
-// TailwindCSS does not allow dynamic classnames
-// therefore existing classnames must be used for color
 export const TOWNS: Allegiance = {
   name: "Towns",
   color: colors.towns,

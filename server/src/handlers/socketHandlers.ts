@@ -20,8 +20,12 @@ import {
 } from "./gameHandlers";
 import { ROLES } from "../utils/roles";
 import { instanceOfRole, instanceOfSettings } from "../utils/typeCheck";
+import { removeItem } from "../utils/helper";
 
 const clients = new Map<string, Client>();
+
+// To do real-time update on if a room is joinable
+const roomRequested = new Map<string, string[]>(); // roomId -> clientId[]
 
 export function onConnection(clientId: string, ws: WebSocket) {
   clients.set(clientId, { ws });
@@ -31,7 +35,10 @@ export function onConnection(clientId: string, ws: WebSocket) {
 
 export function handleSetName(clientId: string, message: Message) {
   const roomId = clients.get(clientId)?.roomId;
-  if (!roomId) throw Error("Client is not in a room.");
+  if (!roomId) {
+    console.log("[SERVER ERROR] Client is not in a room.");
+    return;
+  }
 
   setName(clientId, message);
 
@@ -54,7 +61,9 @@ export function handleJoinRoom(
       throw new Error("RoomId is required to join a room.");
 
     if (message.type == MessageType.JOIN_ROOM) {
-      if (!joinRoom(player, message.data)) {
+      const room = getRoom(message.data);
+
+      if (!room) {
         sendMessage(ws, {
           type: MessageType.INVALID_ROOM,
           data: "RoomId could not be found.",
@@ -63,7 +72,41 @@ export function handleJoinRoom(
         return;
       }
 
+      if (room.players.length === room.settings.maxPlayers) {
+        sendMessage(ws, {
+          type: MessageType.ROOM_FULL,
+          data: "",
+        });
+
+        return;
+      }
+
+      joinRoom(player, message.data);
+
       roomId = message.data;
+
+      const requested = clients.get(clientId)?.roomRequested;
+
+      if (requested && roomRequested.has(roomId)) {
+        removeItem(roomRequested.get(roomId) as string[], clientId);
+
+        delete (clients.get(clientId) as Client).roomRequested;
+      }
+
+      if (roomRequested.get(roomId)?.length === 0) {
+        roomRequested.delete(roomId);
+      } else {
+        if (room.players.length === room.settings.maxPlayers) {
+          roomRequested.get(roomId)?.forEach((clientId) => {
+            const client = (clients.get(clientId) as Client).ws;
+
+            sendMessage(client, {
+              type: MessageType.ROOM_FULL,
+              data: "",
+            });
+          });
+        }
+      }
     }
 
     if (message.type == MessageType.CREATE_ROOM) {
@@ -97,18 +140,41 @@ export function handleKickClient(message: Message) {
   const clientId = message.data;
   if (typeof clientId !== "string") throw Error("Sent data is not a string");
 
+  const roomId = clients.get(clientId)?.roomId as string;
   handleLeaveRoom(clientId);
 
   sendMessage(clients.get(clientId)?.ws as WebSocket, {
     type: MessageType.KICKED,
     data: "",
   });
+
+  if (roomRequested.has(roomId)) {
+    roomRequested.get(roomId)?.forEach((clientId) => {
+      const client = (clients.get(clientId) as Client).ws;
+
+      sendMessage(client, {
+        type: MessageType.ROOM_JOINABLE,
+        data: "",
+      });
+    });
+  }
 }
 
 export function handleClose(clientId: string) {
   const roomId = clients.get(clientId)?.roomId;
+  const requested = clients.get(clientId)?.roomRequested;
 
   if (roomId) handleLeaveRoom(clientId);
+
+  // clean up
+  if (requested && roomRequested.has(requested)) {
+    removeItem(roomRequested.get(requested) as string[], clientId);
+    roomRequested.get(clientId);
+
+    if (roomRequested.get(requested)?.length === 0) {
+      roomRequested.delete(requested);
+    }
+  }
 
   clients.delete(clientId);
 
@@ -183,10 +249,14 @@ export function handleRemoveRole(clientId: string, message: Message) {
   broadcastStateToRoom(roomId);
 }
 
-export function handleCheckRoom(ws: WebSocket, msg: Message) {
+export function handleCheckRoom(clientId: string, ws: WebSocket, msg: Message) {
   const roomId: string = msg.data;
 
   if (!roomId) throw new Error(`Invalid message data: ${msg.data}`);
+
+  if (roomId == "no-room-id-provided") return;
+
+  let joinable = true;
 
   const room = getRoom(roomId);
 
@@ -195,21 +265,33 @@ export function handleCheckRoom(ws: WebSocket, msg: Message) {
       type: MessageType.INVALID_ROOM,
       data: "",
     });
-    return;
+
+    joinable = false;
   }
 
-  if (room.settings.maxPlayers === room.players.length) {
+  if (room && room.settings.maxPlayers === room.players.length) {
     sendMessage(ws, {
       type: MessageType.ROOM_FULL,
       data: "",
     });
-    return;
+
+    joinable = false;
   }
 
-  sendMessage(ws, {
-    type: MessageType.ROOM_JOINABLE,
-    data: "",
-  });
+  if (joinable)
+    sendMessage(ws, {
+      type: MessageType.ROOM_JOINABLE,
+      data: "",
+    });
+
+  // Enables push updates to clients requesting room in real time
+  (clients.get(clientId) as Client).roomRequested = roomId;
+
+  if (roomRequested.has(roomId)) {
+    roomRequested.get(roomId)?.push(clientId);
+  } else {
+    roomRequested.set(roomId, [clientId]);
+  }
 }
 
 function broadcastStateToRoom(roomId: string) {
@@ -268,3 +350,25 @@ export function getClientRoomId(clientId: string) {
 export function removeClientFromRoom(clientId: string) {
   (clients.get(clientId) as Client).roomId = undefined;
 }
+
+export function handleStartGame(clientId: string) {
+  const roomId = clients.get(clientId)?.roomId;
+
+  if (!roomId) throw new Error("Client not in room.");
+
+  const room = getRoom(roomId) as Room;
+
+  const message = {
+    type: MessageType.START_GAME,
+    data: "",
+  };
+
+  room.gameStarted = true;
+
+  room.players.forEach((player) => {
+    const client = (clients.get(player.clientId) as Client).ws;
+    sendMessage(client, message);
+  });
+}
+
+export function handleGameEvent(clientId: string, message: Message) {}

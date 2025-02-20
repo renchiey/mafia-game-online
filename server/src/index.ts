@@ -7,12 +7,14 @@ import {
   handleChangeSettings,
   handleCheckRoom,
   handleClose,
+  handleGameEvent,
   handleGet,
   handleJoinRoom,
   handleKickClient,
   handleLeaveRoom,
   handleRemoveRole,
   handleSetName,
+  handleStartGame,
   onConnection,
   sendMessage,
 } from "./handlers/socketHandlers";
@@ -41,6 +43,7 @@ wss.on("connection", (ws) => {
       console.log(
         `[CLIENT MSG]: client ${clientId} sent a message of type: ${msg.type}`
       );
+      console.log(msg);
 
       switch (msg.type) {
         case MessageType.SET_NAME:
@@ -53,7 +56,7 @@ wss.on("connection", (ws) => {
           handleJoinRoom(clientId, ws, msg);
           break;
         case MessageType.CHECK_ROOM:
-          handleCheckRoom(ws, msg);
+          handleCheckRoom(clientId, ws, msg);
           break;
         case MessageType.CHANGE_SETTIING:
           handleChangeSettings(clientId, msg);
@@ -74,6 +77,12 @@ wss.on("connection", (ws) => {
           break;
         case MessageType.REMOVE_PLAYER:
           handleKickClient(msg);
+          break;
+        case MessageType.START_GAME:
+          handleStartGame(clientId);
+          break;
+        case MessageType.GAME_EVENT:
+          handleGameEvent(clientId, msg);
           break;
         default:
           throw new Error(`Unknown event type: ${msg.type}`);

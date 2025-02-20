@@ -24,18 +24,16 @@ export function Lobby({
   playerId,
   roomId,
 }: LobbyProps) {
-  if (!settings) return null;
-
-  const [copyFeedback, setCopyFeedback] = useState("");
   const [subscribe, unsubscribe, send] = useContext(WebSocketContext);
+  const [copyFeedback, setCopyFeedback] = useState("");
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [showKickedModal, setShowKickedModal] = useState(false);
   const feedbackTimeoutRef = useRef<number | null>(null);
-  const testSound = new Audio("/narrator/mafioso_turn.mp3");
+  //const testSound = new Audio("/narrator/mafioso_turn.mp3");
 
   useEffect(() => {
-    console.log(testSound);
-    testSound.play();
+    // console.log(testSound);
+    // testSound.play();
   }, []);
 
   useEffect(() => {
@@ -76,6 +74,15 @@ export function Lobby({
     window.location.href = import.meta.env.BASE_URL;
   };
 
+  const handleStartGame = () => {
+    send({
+      type: MessageType.START_GAME,
+      data: "",
+    });
+  };
+
+  if (!settings) return null;
+
   return (
     <div className="flex flex-col items-center md:h-full">
       <div className=" mb-10 mt-10">
@@ -101,6 +108,7 @@ export function Lobby({
 
       <div className="flex mt-10">
         <Button
+          onClick={() => handleStartGame()}
           className={
             " py-2 px-4 border-2 rounded-xl mb-5" +
             (playerId === hostId

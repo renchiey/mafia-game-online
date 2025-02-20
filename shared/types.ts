@@ -115,9 +115,6 @@ export interface GameMessageData {
 }
 
 export enum GameMessage {
-  WAITING = "waiting",
-  START = "start",
-
   // role turn indicators
   MAFIOSO_TURN = "mafioso_turn",
   INVESTIGATOR_TURN = "investigator-turn",

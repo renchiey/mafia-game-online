@@ -1,5 +1,9 @@
 import {
+  AllegianceType,
+  DeathType,
+  GameMessage,
   GamePhase,
+  GameRole,
   Message,
   Player,
   Role,
@@ -7,6 +11,7 @@ import {
   Settings,
   SettingsOptions,
 } from "../../../shared/types";
+import { MessageType } from "../../../shared/types";
 import { getClientRoomId, removeClientFromRoom } from "./socketHandlers";
 
 const rooms = new Map<string, Room>();
@@ -16,7 +21,13 @@ export const settingOptions: SettingsOptions = {
   roundSpeed: [1, 1.25, 1.5, 1.75, 2],
 };
 
-const TURN_TIMEOUT = 15000; // 15 second
+const MIN_PLAYERS = 4;
+
+const DISCUSSION_TIMEOUT = 60000; // 1 minute
+
+const VOTING_TIMEOUT = 10000; // 10 seconds
+
+const TURN_TIMEOUT = 15000; // 15 seconds
 
 const STAGGER_TIMEOUT = 1000; // 1 second
 
@@ -60,7 +71,11 @@ export function generateEmptyRoom(host: Player) {
     rolesPool: [],
     gameState: {
       round: 0,
-      dead: [],
+      gamePhase: GamePhase.NIGHT,
+      mafia: [],
+      towns: [],
+      neutrals: [],
+      endTurn: 0,
       veteranShotsRemaining: 3,
     },
     settings: {
@@ -103,6 +118,8 @@ export function removePlayer(clientId: string, roomId: string) {
   removeClientFromRoom(player.clientId);
 
   if (!room) return;
+
+  endGame(roomId);
 
   // closing room
   if (room.players.length == 0) {
@@ -168,4 +185,248 @@ export function changeSettings(roomId: string, settings: Settings) {
 // for socket handler
 export function getRoom(roomId: string) {
   return rooms.get(roomId);
+}
+
+export function startGame(roomId: string): MessageType {
+  const room = rooms.get(roomId) as Room;
+
+  if (room.players.length < MIN_PLAYERS) return MessageType.NOT_ENOUGH_PLAYERS;
+
+  if (room.rolesPool.length < room.players.length)
+    return MessageType.FILL_ROLE_POOL;
+
+  room.gameStarted = true;
+
+  // reset game state
+  room.gameState = {
+    round: 1,
+    gamePhase: GamePhase.NIGHT,
+    mafia: [],
+    towns: [],
+    neutrals: [],
+    endTurn: 0,
+    veteranShotsRemaining: 3,
+  };
+
+  // assign roles to each player
+  assignPlayerRoles(room);
+
+  return MessageType.START_GAME;
+}
+
+function assignPlayerRoles(room: Room) {
+  /**
+   * Assigns each player in the room a role
+   */
+  const roles = [...room.rolesPool];
+
+  let pIndex = 0;
+  while (roles.length > 0) {
+    const player = room.players[pIndex];
+
+    const roleIndex = Math.floor(Math.random() * roles.length);
+    const role = roles[roleIndex];
+
+    player.gameData = {
+      role: role,
+    };
+
+    if (role.allegiance.name === AllegianceType.MAFIA) {
+      room.gameState.mafia.push(player);
+    }
+
+    if (role.allegiance.name === AllegianceType.TOWN) {
+      room.gameState.towns.push(player);
+    }
+
+    if (role.allegiance.name === AllegianceType.NEUTRAL) {
+      room.gameState.neutrals.push(player);
+    }
+
+    roles.splice(roleIndex, 1);
+    pIndex++;
+  }
+}
+
+export function endGame(roomId: string) {
+  const room = rooms.get(roomId) as Room;
+
+  room.gameStarted = false;
+}
+
+export function nextPhase(roomId: string): [GamePhase, number] {
+  /**
+   * Gets the next phase for an active game.
+   *
+   * Returns the time (ms) it should take for the phase to end
+   */
+  const room = rooms.get(roomId) as Room;
+
+  let phase: GamePhase;
+  let timeout: number = 0;
+  switch (room.gameState.gamePhase) {
+    case GamePhase.BEGINNING:
+      [phase, timeout] = transitionPhaseHelper(roomId, 0);
+      break;
+    case GamePhase.NIGHT:
+      [phase, timeout] = transitionPhaseHelper(roomId, 1);
+      break;
+    case GamePhase.MAFIOSO_TURN:
+      [phase, timeout] = transitionPhaseHelper(roomId, 2);
+      break;
+    case GamePhase.DOCTOR_TURN:
+      [phase, timeout] = transitionPhaseHelper(roomId, 3);
+      break;
+    case GamePhase.INVESTIGATOR_TURN:
+      [phase, timeout] = transitionPhaseHelper(roomId, 4);
+      break;
+    case GamePhase.TRANSPORTER_TURN:
+      [phase, timeout] = transitionPhaseHelper(roomId, 5);
+      break;
+    case GamePhase.DISCUSSION:
+      [phase, timeout] = transitionPhaseHelper(roomId, 6);
+      break;
+    case GamePhase.VOTING:
+      [phase, timeout] = transitionPhaseHelper(roomId, 7);
+      break;
+    default:
+      [phase, timeout] = [GamePhase.BEGINNING, 0];
+
+      endGame(roomId);
+  }
+
+  return [phase, timeout];
+}
+
+function transitionPhaseHelper(
+  roomId: string,
+  pass: number
+): [GamePhase, number] {
+  /**
+   * Helper function to transition game state to next phase
+   *
+   * Returns the time (ms) it should take for the phase to end
+   */
+  const room = rooms.get(roomId) as Room;
+
+  let phase: GamePhase | null = null;
+
+  if (pass === 0) {
+    const gameOver = checkGameOver(roomId);
+
+    if (gameOver) {
+      return [gameOver, 0];
+    }
+
+    return [GamePhase.NIGHT, STAGGER_TIMEOUT];
+  }
+
+  if (pass <= 1 && roomHasRole(roomId, GameRole.MAFIOSO)) {
+    phase = GamePhase.MAFIOSO_TURN;
+
+    room.gameState.gamePhase = phase;
+  } else if (pass <= 2 && roomHasRole(roomId, GameRole.DOCTOR)) {
+    phase = GamePhase.DOCTOR_TURN;
+
+    room.gameState.gamePhase = phase;
+  } else if (pass <= 3 && roomHasRole(roomId, GameRole.INVESTIGATOR)) {
+    phase = GamePhase.INVESTIGATOR_TURN;
+
+    room.gameState.gamePhase = phase;
+  } else if (pass <= 4 && roomHasRole(roomId, GameRole.TRANSPORTER)) {
+    phase = GamePhase.TRANSPORTER_TURN;
+
+    room.gameState.gamePhase = phase;
+  }
+
+  if (phase)
+    return [phase, Math.round(TURN_TIMEOUT * (1 / room.settings.roundSpeed))];
+
+  let timeout: number;
+
+  if (pass <= 5) {
+    const gameOver = checkGameOver(roomId);
+
+    if (gameOver) {
+      return [gameOver, 0];
+    }
+
+    phase = GamePhase.DISCUSSION;
+
+    room.gameState.gamePhase = phase;
+
+    timeout = DISCUSSION_TIMEOUT;
+  } else if (pass <= 6) {
+    phase = GamePhase.VOTING;
+
+    room.gameState.gamePhase = phase;
+
+    timeout = VOTING_TIMEOUT;
+  } else {
+    const gameOver = checkGameOver(roomId);
+
+    if (gameOver) {
+      return [gameOver, 0];
+    }
+
+    phase = GamePhase.NIGHT;
+
+    room.gameState.gamePhase = phase;
+
+    room.gameState.round++;
+
+    timeout = STAGGER_TIMEOUT;
+  }
+
+  return [phase, timeout];
+}
+
+function checkGameOver(roomId: string): GamePhase | null {
+  const room = rooms.get(roomId) as Room;
+
+  let mafia_alive = 0;
+  room.gameState.mafia.forEach((player) => {
+    if (!player.gameData?.dead) mafia_alive++;
+  });
+
+  let towns_alive = 0;
+  room.gameState.towns.forEach((player) => {
+    if (!player.gameData?.dead) towns_alive++;
+  });
+
+  let jester_lynched = false;
+  room.gameState.neutrals.forEach((player) => {
+    if (
+      player.gameData?.dead &&
+      player.gameData.role.name === GameRole.JESTER &&
+      player.gameData.dead === DeathType.LYNCHED
+    )
+      jester_lynched = true;
+  });
+
+  if (jester_lynched) {
+    return GamePhase.JESTER_WIN;
+  }
+
+  if (towns_alive < mafia_alive) {
+    return GamePhase.MAFIA_WIN;
+  }
+
+  if (mafia_alive === 0) {
+    return GamePhase.TOWNS_WIN;
+  }
+
+  return null;
+}
+
+function roomHasRole(roomId: string, role: GameRole) {
+  const room = rooms.get(roomId);
+
+  if (!room) return false;
+
+  for (const r of room.rolesPool) {
+    if (r.name === role) return true;
+  }
+
+  return false;
 }

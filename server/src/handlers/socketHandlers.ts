@@ -5,6 +5,8 @@ import {
   Room,
   Message,
   MessageType,
+  GameMessage,
+  GameMessageData,
 } from "../../../shared/types";
 import { Client } from "../types";
 import {
@@ -13,10 +15,12 @@ import {
   generateEmptyRoom,
   getRoom,
   joinRoom,
+  nextPhase,
   removePlayer,
   removeRole,
   setName,
   settingOptions,
+  startGame,
 } from "./gameHandlers";
 import { ROLES } from "../utils/roles";
 import { instanceOfRole, instanceOfSettings } from "../utils/typeCheck";
@@ -30,6 +34,10 @@ const roomRequested = new Map<string, string[]>(); // roomId -> clientId[]
 export function onConnection(clientId: string, ws: WebSocket) {
   clients.set(clientId, { ws });
 
+  sendMessage(ws, {
+    type: MessageType.CONNECTED,
+    data: "",
+  });
   console.log(`[SERVER EVENT] Client connected with ID: ${clientId}`);
 }
 
@@ -358,17 +366,47 @@ export function handleStartGame(clientId: string) {
 
   const room = getRoom(roomId) as Room;
 
-  const message = {
-    type: MessageType.START_GAME,
+  const messageType = startGame(roomId);
+
+  const message: Message = {
+    type: messageType,
     data: "",
   };
 
-  room.gameStarted = true;
+  broadcastStateToRoom(roomId);
 
   room.players.forEach((player) => {
     const client = (clients.get(player.clientId) as Client).ws;
     sendMessage(client, message);
   });
+
+  const [phase, timeout] = nextPhase(roomId);
+
+  broadcastStateToRoom(roomId);
 }
 
-export function handleGameEvent(clientId: string, message: Message) {}
+export function handleGameEvent(clientId: string, message: Message) {
+  const gameMessageData: GameMessageData = message.data;
+
+  const roomId = clients.get(clientId)?.roomId;
+
+  if (!roomId) throw Error("Client not in room");
+
+  const room = getRoom(roomId) as Room;
+
+  switch (gameMessageData.type) {
+    case GameMessage.END_TURN:
+      room.gameState.endTurn += 1;
+
+      if (room.gameState.endTurn >= room.players.length) {
+        const [p, t] = nextPhase(roomId);
+
+        console.log(`[GAME EVENT] Going to next phase ${p}`);
+
+        broadcastStateToRoom(roomId);
+      }
+      break;
+    default:
+      throw new Error("Should not be here");
+  }
+}

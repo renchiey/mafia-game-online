@@ -26,9 +26,11 @@ export function Lobby({
 }: LobbyProps) {
   const [subscribe, unsubscribe, send] = useContext(WebSocketContext);
   const [copyFeedback, setCopyFeedback] = useState("");
+  const [startFeedback, setStartFeedback] = useState("");
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [showKickedModal, setShowKickedModal] = useState(false);
-  const feedbackTimeoutRef = useRef<number | null>(null);
+  const copyTimeoutRef = useRef<number | null>(null);
+  const startTimeoutRef = useRef<number | null>(null);
   //const testSound = new Audio("/narrator/mafioso_turn.mp3");
 
   useEffect(() => {
@@ -48,11 +50,36 @@ export function Lobby({
 
     subscribe(MessageType.SERVER_ERROR, () => setShowKickedModal(true));
 
+    subscribe(MessageType.CONNECTED, () => setShowKickedModal(true));
+
+    subscribe(MessageType.NOT_ENOUGH_PLAYERS, () =>
+      showStartFeedback("Not enough players to start game.")
+    );
+
+    subscribe(MessageType.FILL_ROLE_POOL, () =>
+      showStartFeedback("Fill up roles pool before starting.")
+    );
+
     return () => {
       unsubscribe(MessageType.ROLES);
+      unsubscribe(MessageType.KICKED);
       unsubscribe(MessageType.SERVER_ERROR);
+      unsubscribe(MessageType.CONNECTED);
+      unsubscribe(MessageType.NOT_ENOUGH_PLAYERS);
+      unsubscribe(MessageType.FILL_ROLE_POOL);
     };
   }, [subscribe, unsubscribe]);
+
+  const showStartFeedback = (message: string) => {
+    setStartFeedback(message);
+
+    if (startTimeoutRef.current) clearTimeout(startTimeoutRef.current);
+
+    startTimeoutRef.current = setTimeout(() => {
+      setStartFeedback("");
+      startTimeoutRef.current = null;
+    }, 2000);
+  };
 
   const handleCopyLink = () => {
     setCopyFeedback("Invite link copied!");
@@ -62,11 +89,11 @@ export function Lobby({
       .then(() => setCopyFeedback("Invite link copied!"))
       .catch(() => setCopyFeedback("Failed to copy link."));
 
-    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
 
-    feedbackTimeoutRef.current = setTimeout(() => {
+    copyTimeoutRef.current = setTimeout(() => {
       setCopyFeedback("");
-      feedbackTimeoutRef.current = null;
+      copyTimeoutRef.current = null;
     }, 2000);
   };
 
@@ -106,19 +133,20 @@ export function Lobby({
         />
       </div>
 
-      <div className="flex mt-10">
+      <div className="flex mt-10 flex-col">
         <Button
           onClick={() => handleStartGame()}
           className={
             " py-2 px-4 border-2 rounded-xl mb-5" +
             (playerId === hostId
               ? " border-white hover:bg-red-800 active:bg-red-800 cursor-pointer "
-              : "border-gray-400 text-gray-400 cursor-not-allowed")
+              : " border-gray-400 text-gray-400 cursor-not-allowed")
           }
         >
           Start Game
         </Button>
       </div>
+      <p className=" text-center">{startFeedback}</p>
       <Modal show={showKickedModal} closeModal={() => handleCloseModal()}>
         <h2 className="text-lg font-semibold text-red-600">Disconnected</h2>
         <p className="text-gray-600 mt-2">You have been kicked from the room</p>

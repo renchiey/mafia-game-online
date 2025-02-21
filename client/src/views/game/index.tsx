@@ -1,6 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { WebSocketContext } from "../../contexts/WSContext";
 import {
+  GameMessage,
+  GameMessageData,
+  GamePhase,
   MessageType,
   Player,
   Role,
@@ -18,11 +21,23 @@ export function Game() {
   const [playerId, setPlayerId] = useState<string>("");
   const [hostId, setHostId] = useState<string>("");
   const [roomId, setRoomId] = useState<string>("");
+  const [gamePhase, setGamePhase] = useState<GamePhase>();
   const [inGame, setInGame] = useState(false);
+
+  // Game over state
+  const [gameOver, setGameOver] = useState(false);
+
+  const [timer, setTimer] = useState(0);
+
+  const timerIntervalRef = useRef<number>();
+  const turnTimeoutRef = useRef<number>();
+  const audioRef = useRef<HTMLAudioElement>();
 
   useEffect(() => {
     // Get initial room data
     send({ type: MessageType.GET_STATE });
+
+    return () => clearTimeout(turnTimeoutRef.current);
   }, []);
 
   useEffect(() => {
@@ -31,25 +46,123 @@ export function Game() {
 
   useEffect(() => {
     subscribe(MessageType.STATE, (data: any) => {
-      const { room, clientId } = data;
+      const { room, clientId }: { room: Room; clientId: string } = data;
 
       console.log("data", data);
       console.log(room);
       setPlayerId(clientId);
-      setPlayers((room as Room).players);
-      setRolesPool((room as Room).rolesPool);
-      setSettings((room as Room).settings);
-      setHostId((room as Room).host);
-      setRoomId((room as Room).roomId);
+      setPlayers(room.players);
+      setRolesPool(room.rolesPool);
+      setSettings(room.settings);
+      setHostId(room.host);
+      setRoomId(room.roomId);
+      setInGame(room.gameStarted);
+      setGamePhase(room.gameState.gamePhase);
     });
-
-    subscribe(MessageType.START_GAME, () => setInGame(true));
 
     return () => unsubscribe(MessageType.STATE);
   }, [subscribe, unsubscribe]);
 
+  useEffect(() => {
+    if (inGame && gamePhase === GamePhase.BEGINNING) {
+      goNextPhase();
+      return;
+    }
+    if (!inGame || !gamePhase) return;
+
+    const audio = new Audio(`/narrator/${gamePhase}.mp3`);
+    audioRef.current = audio;
+
+    audio.addEventListener("ended", handleEnded);
+    audio.play();
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.removeEventListener("ended", handleEnded);
+        audioRef.current.removeEventListener("ended", goNextPhase);
+      }
+    };
+  }, [gamePhase, inGame]);
+
+  const handleEnded = () => {
+    if (
+      gamePhase === GamePhase.MAFIOSO_TURN ||
+      gamePhase === GamePhase.DOCTOR_TURN ||
+      gamePhase === GamePhase.INVESTIGATOR_TURN ||
+      gamePhase === GamePhase.TRANSPORTER_TURN
+    ) {
+      startTurn();
+    } else if (gamePhase === GamePhase.DISCUSSION) {
+      startDiscussion();
+    } else if (gamePhase === GamePhase.VOTING) {
+      startVoting();
+    }
+  };
+
+  const startTurn = () => {
+    setTimer(15);
+
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+    timerIntervalRef.current = setInterval(() => {
+      if (timer > 0) setTimer(timer - 1);
+    }, 1000);
+
+    turnTimeoutRef.current = setTimeout(() => {
+      clearInterval(timerIntervalRef.current);
+
+      const audio = new Audio("/narrator/turn_done.mp3");
+
+      audioRef.current = audio;
+
+      audio.addEventListener("ended", goNextPhase);
+
+      audio.play();
+    }, 15000);
+  };
+
+  const startDiscussion = () => {
+    setTimer(60);
+
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+    timerIntervalRef.current = setInterval(() => {
+      if (timer > 0) setTimer(timer - 1);
+    }, 1000);
+
+    turnTimeoutRef.current = setTimeout(() => {
+      goNextPhase();
+    }, 60000);
+  };
+
+  const startVoting = () => {
+    setTimer(10);
+
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+    timerIntervalRef.current = setInterval(() => {
+      if (timer > 0) setTimer(timer - 1);
+    }, 1000);
+
+    turnTimeoutRef.current = setTimeout(() => {
+      goNextPhase();
+    }, 10000);
+  };
+
+  const goNextPhase = () => {
+    send({
+      type: MessageType.GAME_EVENT,
+      data: {
+        type: GameMessage.END_TURN,
+      },
+    });
+  };
+
   return inGame ? (
-    <>hello</>
+    <div className="flex flex-col">
+      <div>phase: {gamePhase}</div>
+      <div>timer: {timer}</div>
+    </div>
   ) : (
     <Lobby
       players={players}

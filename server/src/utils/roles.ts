@@ -1,4 +1,9 @@
-import { Allegiance, Role } from "../../../shared/types";
+import {
+  Allegiance,
+  AllegianceType,
+  GameRole,
+  Role,
+} from "../../../shared/types";
 
 import {
   DoctorIcon,
@@ -9,64 +14,64 @@ import {
   TransportIcon,
   VeteranIcon,
 } from "./icons";
-import { colors } from "../../../shared/colors";
+import c from "../../../shared/colors";
 
 export const TOWNS: Allegiance = {
-  name: "Towns",
-  color: colors.towns,
+  name: AllegianceType.TOWN,
+  color: c.colors.towns,
 };
 
 export const MAFIA: Allegiance = {
-  name: "Mafia",
-  color: colors.mafia,
+  name: AllegianceType.MAFIA,
+  color: c.colors.mafia,
 };
 
 export const NEUTRAL: Allegiance = {
-  name: "Neutral",
-  color: colors.neutral,
+  name: AllegianceType.NEUTRAL,
+  color: c.colors.neutral,
 };
 
 export const ROLES: Role[] = [
   {
-    name: "Mafioso",
+    name: GameRole.MAFIOSO,
     iconSrc: MafiosoIcon,
     allegiance: MAFIA,
     description:
       "Kill someone each night until no one can stand in the way of the Mafia.",
   },
   {
-    name: "Investigator",
+    name: GameRole.INVESTIGATOR,
     iconSrc: InvestigatorIcon,
     allegiance: TOWNS,
     description: "Investigate one person each night for a clue to their role.",
   },
   {
-    name: "Townie",
+    name: GameRole.TOWNIE,
     iconSrc: TownieIcon,
     allegiance: TOWNS,
     description: "You are an innocent member of the Town.",
   },
   {
-    name: "Doctor",
+    name: GameRole.DOCTOR,
     iconSrc: DoctorIcon,
     allegiance: TOWNS,
     description: "Heal one person each night, preventing them from dying.",
   },
   {
-    name: "Veteran",
+    name: GameRole.VETERAN,
     iconSrc: VeteranIcon,
     allegiance: TOWNS,
     description:
       "Decide if you will go on alert on a certain night and kill anyone who visits you.",
   },
   {
-    name: "Transporter",
+    name: GameRole.TRANSPORTER,
     iconSrc: TransportIcon,
     allegiance: TOWNS,
     description: "Choose two people to transport at night.",
   },
   {
-    name: "Jester",
+    name: GameRole.JESTER,
     iconSrc: JesterIcon,
     allegiance: NEUTRAL,
     description: "Trick the Town into voting against you.",

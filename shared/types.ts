@@ -1,10 +1,16 @@
+export enum AllegianceType {
+  MAFIA = "Mafia",
+  TOWN = "Town",
+  NEUTRAL = "Neutral",
+}
+
 export interface Allegiance {
   name: string;
   color: string;
 }
 
 export interface Role {
-  name: string;
+  name: GameRole;
   iconSrc: string;
   allegiance: Allegiance;
   description: string;
@@ -13,7 +19,10 @@ export interface Role {
 export interface Player {
   clientId: string;
   username?: string;
-  role?: Role;
+  gameData?: {
+    role: Role;
+    dead?: DeathType;
+  };
 }
 
 export interface Settings {
@@ -30,15 +39,33 @@ export interface SettingsOptions {
 }
 
 export enum GamePhase {
-  NIGHT = 0,
-  DISCUSSION = 1,
-  VOTING = 2,
-  COMPLETE = 3,
+  BEGINNING = "beginning",
+  NIGHT = "night",
+  MAFIOSO_TURN = "mafioso_turn",
+  INVESTIGATOR_TURN = "investigator_turn",
+  DOCTOR_TURN = "doctor_turn",
+  TRANSPORTER_TURN = "transporter_turn",
+  DISCUSSION = "discussion_time",
+  VOTING = "voting_time",
+
+  // Game over
+  MAFIA_WIN = "mafia_win",
+  TOWNS_WIN = "towns_win",
+  JESTER_WIN = "jester_win",
+}
+
+export enum DeathType {
+  LYNCHED = "lynched",
+  KILLED = "killed",
 }
 
 export interface GameState {
   round: number;
-  dead: Player[];
+  mafia: Player[];
+  towns: Player[];
+  neutrals: Player[];
+  gamePhase: GamePhase;
+  endTurn: number;
   killVoted?: string[];
   transported?: Transported;
   healed?: string;
@@ -93,6 +120,7 @@ export enum MessageType {
   CHECK_ROOM = "check-room",
 
   // Server Events
+  CONNECTED = "connected",
   JOINED_ROOM = "joined-room",
   INVALID_ROOM = "invalid-room",
   PLAYER_JOINED = "player-joined",
@@ -102,6 +130,8 @@ export enum MessageType {
   ROOM_FULL = "room-full",
   ROOM_JOINABLE = "room-joinable",
   GAME_IN_PROGRESS = "game-in-progress",
+  FILL_ROLE_POOL = "fill-role-pool",
+  NOT_ENOUGH_PLAYERS = "not-enough-players",
 
   // Umbrella event for in-game events
   GAME_EVENT = "game-event",
@@ -109,7 +139,7 @@ export enum MessageType {
 
 export interface GameMessageData {
   type: GameMessage;
-  playerSelected: string;
+  playerSelected?: string;
   playerSelected2?: string;
   message?: any;
 }
@@ -138,4 +168,14 @@ export enum GameMessage {
   MAFIA_WIN = "mafia-win",
   TOWNS_WIN = "towns-win",
   JESTER_WIN = "jester-win",
+}
+
+export enum GameRole {
+  MAFIOSO = "Mafioso",
+  DOCTOR = "Doctor",
+  INVESTIGATOR = "Investigator",
+  TRANSPORTER = "Transporter",
+  TOWNIE = "Townie",
+  VETERAN = "Veteran",
+  JESTER = "Jester",
 }

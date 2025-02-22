@@ -200,7 +200,7 @@ export function startGame(roomId: string): MessageType {
   // reset game state
   room.gameState = {
     round: 1,
-    gamePhase: GamePhase.NIGHT,
+    gamePhase: GamePhase.BEGINNING,
     mafia: [],
     towns: [],
     neutrals: [],
@@ -317,6 +317,7 @@ function transitionPhaseHelper(
     if (gameOver) {
       return [gameOver, 0];
     }
+    room.gameState.gamePhase = GamePhase.NIGHT;
 
     return [GamePhase.NIGHT, STAGGER_TIMEOUT];
   }
@@ -405,14 +406,20 @@ function checkGameOver(roomId: string): GamePhase | null {
   });
 
   if (jester_lynched) {
+    room.gameState.gamePhase = GamePhase.JESTER_WIN;
+
     return GamePhase.JESTER_WIN;
   }
 
   if (towns_alive < mafia_alive) {
+    room.gameState.gamePhase = GamePhase.MAFIA_WIN;
+
     return GamePhase.MAFIA_WIN;
   }
 
   if (mafia_alive === 0) {
+    room.gameState.gamePhase = GamePhase.TOWNS_WIN;
+
     return GamePhase.TOWNS_WIN;
   }
 

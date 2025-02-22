@@ -373,16 +373,15 @@ export function handleStartGame(clientId: string) {
     data: "",
   };
 
-  broadcastStateToRoom(roomId);
+  if (messageType === MessageType.START_GAME) {
+    broadcastStateToRoom(roomId);
+    return;
+  }
 
   room.players.forEach((player) => {
     const client = (clients.get(player.clientId) as Client).ws;
     sendMessage(client, message);
   });
-
-  const [phase, timeout] = nextPhase(roomId);
-
-  broadcastStateToRoom(roomId);
 }
 
 export function handleGameEvent(clientId: string, message: Message) {
@@ -399,11 +398,12 @@ export function handleGameEvent(clientId: string, message: Message) {
       room.gameState.endTurn += 1;
 
       if (room.gameState.endTurn >= room.players.length) {
+        room.gameState.endTurn = 0;
         const [p, t] = nextPhase(roomId);
 
         console.log(`[GAME EVENT] Going to next phase ${p}`);
 
-        broadcastStateToRoom(roomId);
+        setTimeout(() => broadcastStateToRoom(roomId), 1500);
       }
       break;
     default:

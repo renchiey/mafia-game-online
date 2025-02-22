@@ -24,20 +24,21 @@ export function Game() {
   const [gamePhase, setGamePhase] = useState<GamePhase>();
   const [inGame, setInGame] = useState(false);
 
+  const [turnStarted, setTurnStarted] = useState(false);
+  const [discussionStarted, setDiscussionStarted] = useState(false);
+  const [votingStarted, setVotingStarted] = useState(false);
+
   // Game over state
   const [gameOver, setGameOver] = useState(false);
 
   const [timer, setTimer] = useState(0);
 
-  const timerIntervalRef = useRef<number>();
   const turnTimeoutRef = useRef<number>();
   const audioRef = useRef<HTMLAudioElement>();
 
   useEffect(() => {
     // Get initial room data
     send({ type: MessageType.GET_STATE });
-
-    return () => clearTimeout(turnTimeoutRef.current);
   }, []);
 
   useEffect(() => {
@@ -48,7 +49,7 @@ export function Game() {
     subscribe(MessageType.STATE, (data: any) => {
       const { room, clientId }: { room: Room; clientId: string } = data;
 
-      console.log("data", data);
+      // console.log("data", data);
       console.log(room);
       setPlayerId(clientId);
       setPlayers(room.players);
@@ -70,6 +71,15 @@ export function Game() {
     }
     if (!inGame || !gamePhase) return;
 
+    if (
+      gamePhase === GamePhase.MAFIOSO_TURN ||
+      gamePhase === GamePhase.DOCTOR_TURN ||
+      gamePhase === GamePhase.INVESTIGATOR_TURN ||
+      gamePhase === GamePhase.TRANSPORTER_TURN
+    )
+      setTimer(15);
+    else if (gamePhase === GamePhase.DISCUSSION) setTimer(60);
+
     const audio = new Audio(`/narrator/${gamePhase}.mp3`);
     audioRef.current = audio;
 
@@ -81,8 +91,19 @@ export function Game() {
         audioRef.current.removeEventListener("ended", handleEnded);
         audioRef.current.removeEventListener("ended", goNextPhase);
       }
+      clearTimeout(turnTimeoutRef.current);
     };
   }, [gamePhase, inGame]);
+
+  useEffect(() => {
+    if (!(votingStarted || discussionStarted || turnStarted)) return;
+
+    const interval = setInterval(() => {
+      if (timer > 0) setTimer(timer - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timer, votingStarted, discussionStarted, turnStarted]);
 
   const handleEnded = () => {
     if (
@@ -96,21 +117,15 @@ export function Game() {
       startDiscussion();
     } else if (gamePhase === GamePhase.VOTING) {
       startVoting();
+    } else {
+      goNextPhase();
     }
   };
 
   const startTurn = () => {
-    setTimer(15);
-
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-
-    timerIntervalRef.current = setInterval(() => {
-      if (timer > 0) setTimer(timer - 1);
-    }, 1000);
+    setTurnStarted(true);
 
     turnTimeoutRef.current = setTimeout(() => {
-      clearInterval(timerIntervalRef.current);
-
       const audio = new Audio("/narrator/turn_done.mp3");
 
       audioRef.current = audio;
@@ -118,34 +133,28 @@ export function Game() {
       audio.addEventListener("ended", goNextPhase);
 
       audio.play();
+
+      setTurnStarted(false);
     }, 15000);
   };
 
   const startDiscussion = () => {
-    setTimer(60);
-
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-
-    timerIntervalRef.current = setInterval(() => {
-      if (timer > 0) setTimer(timer - 1);
-    }, 1000);
+    setDiscussionStarted(true);
 
     turnTimeoutRef.current = setTimeout(() => {
       goNextPhase();
+
+      setDiscussionStarted(false);
     }, 60000);
   };
 
   const startVoting = () => {
-    setTimer(10);
-
-    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-
-    timerIntervalRef.current = setInterval(() => {
-      if (timer > 0) setTimer(timer - 1);
-    }, 1000);
+    setVotingStarted(true);
 
     turnTimeoutRef.current = setTimeout(() => {
       goNextPhase();
+
+      setVotingStarted(false);
     }, 10000);
   };
 

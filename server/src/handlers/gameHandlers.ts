@@ -1,7 +1,7 @@
 import {
   AllegianceType,
   DeathType,
-  GameMessage,
+  GameMessageType,
   GamePhase,
   GameRole,
   Message,
@@ -46,6 +46,8 @@ export function setName(clientId: string, data: Message) {
   const player = room?.players.find((player) => player.clientId == clientId);
 
   (player as Player).username = username;
+
+  return username;
 }
 
 export function generateRoomId() {

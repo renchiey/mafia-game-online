@@ -6,6 +6,7 @@ import { PlayerList } from "../../components/PlayersList/PlayerList";
 import { RoleList } from "../../components/RolesList/RoleList";
 import SettingsWidget from "../../components/SettingsWidget/SettingsWidget";
 import { Modal } from "../../components/Modal";
+import { ChatWidget } from "../../components/ChatWidget/ChatWidget";
 
 interface LobbyProps {
   players: Player[];
@@ -124,14 +125,14 @@ export function Lobby({
           numPlayers={players.length}
           isHost={playerId === hostId}
         />
-        <SettingsWidget
-          isHost={
-            playerId.length > 0 && hostId.length > 0 && playerId === hostId
-          }
-          settings={settings}
-          numPlayers={players.length}
-        />
+        <ChatWidget players={players} playerId={playerId} />
       </div>
+      <SettingsWidget
+        isHost={playerId.length > 0 && hostId.length > 0 && playerId === hostId}
+        settings={settings}
+        numPlayers={players.length}
+        className="mt-5"
+      />
 
       <div className="flex mt-10 flex-col">
         <Button

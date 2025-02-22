@@ -5,6 +5,7 @@ import { Message, MessageType } from "../../shared/types";
 import {
   handleAddRole,
   handleChangeSettings,
+  handleChatMessage,
   handleCheckRoom,
   handleClose,
   handleGameEvent,
@@ -84,6 +85,9 @@ wss.on("connection", (ws) => {
         case MessageType.GAME_EVENT:
           console.log(`[GAME EVENT] ${msg.data}`);
           handleGameEvent(clientId, msg);
+          break;
+        case MessageType.CHAT_MESSAGE:
+          handleChatMessage(clientId, msg);
           break;
         default:
           throw new Error(`Unknown event type: ${msg.type}`);

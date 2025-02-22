@@ -11,12 +11,14 @@ interface SettingsWidgetProps {
   isHost: boolean;
   settings: Settings;
   numPlayers: number;
+  className?: string;
 }
 
 const SettingsWidget = ({
   isHost,
   settings,
   numPlayers,
+  className,
 }: SettingsWidgetProps) => {
   const [maxPlayersOpts, setMaxPlayersOpts] = useState<number[]>([]);
   const [maxPlayers, setMaxPlayers] = useState<number>(settings.maxPlayers);
@@ -24,6 +26,10 @@ const SettingsWidget = ({
   const [speed, setSpeed] = useState<number>(settings.roundSpeed);
   const [revealRole, setRevealRole] = useState(false);
   const [narrator, setNarrator] = useState(false);
+  const [veteranShots, setVeteranShots] = useState<number>(
+    settings.veteranShots
+  );
+
   const [settingsChanged, setSettingsChanged] = useState(false);
   const [popupMsg, setPopupMsg] = useState<ReactNode | null>(null);
   const timeoutRef = useRef<number>();
@@ -60,6 +66,7 @@ const SettingsWidget = ({
       roundSpeed: speed,
       revealRoleAfterDeath: revealRole,
       narrator,
+      veteranShots,
     };
 
     if (isHost && settingsChanged) {
@@ -88,7 +95,12 @@ const SettingsWidget = ({
   };
 
   return (
-    <div className="w-full  md:max-w-md max-w-[280px] p-4 bg-stone-800 shadow-md rounded-2xl relative ">
+    <div
+      className={
+        "w-full  md:max-w-md max-w-[280px] p-4 bg-stone-800 shadow-md rounded-2xl relative " +
+        className
+      }
+    >
       {!isHost && (
         <div className=" h-full w-full bg-gray-500 absolute opacity-40 top-0 left-0 cursor-not-allowed rounded-2xl"></div>
       )}
@@ -167,7 +179,7 @@ const SettingsWidget = ({
         <button
           onClick={handleSave}
           className={
-            "w-full bg-blue-500 p-2 rounded-lg hover:bg-blue-600 transition" +
+            "w-full bg-blue-500 p-2 rounded-lg hover:bg-blue-600 active:bg-blue-600 transition" +
             (settingsChanged
               ? " cursor-pointer text-white"
               : " bg-blue-600 text-gray-200")

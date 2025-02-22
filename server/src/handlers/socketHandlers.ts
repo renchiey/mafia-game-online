@@ -5,8 +5,9 @@ import {
   Room,
   Message,
   MessageType,
-  GameMessage,
+  GameMessageType,
   GameMessageData,
+  ChatMessage,
 } from "../../../shared/types";
 import { Client } from "../types";
 import {
@@ -48,9 +49,26 @@ export function handleSetName(clientId: string, message: Message) {
     return;
   }
 
-  setName(clientId, message);
+  const username = setName(clientId, message);
+
+  (clients.get(clientId) as Client).username = username;
 
   broadcastStateToRoom(roomId);
+
+  const newMessage: ChatMessage = {
+    id: Date.now(),
+    text: `${username} has joined the room.`,
+    sender: "server",
+  };
+
+  setTimeout(
+    () =>
+      broadcastToRoom(roomId, {
+        type: MessageType.CHAT_MESSAGE,
+        data: newMessage,
+      }),
+    200
+  );
 }
 
 export function handleJoinRoom(
@@ -62,14 +80,14 @@ export function handleJoinRoom(
     clientId,
   };
 
-  let roomId;
+  let roomId = message.data;
 
   try {
-    if (message.type == MessageType.JOIN_ROOM && !message.data)
+    if (message.type == MessageType.JOIN_ROOM && !roomId)
       throw new Error("RoomId is required to join a room.");
 
     if (message.type == MessageType.JOIN_ROOM) {
-      const room = getRoom(message.data);
+      const room = getRoom(roomId);
 
       if (!room) {
         sendMessage(ws, {
@@ -89,9 +107,7 @@ export function handleJoinRoom(
         return;
       }
 
-      joinRoom(player, message.data);
-
-      roomId = message.data;
+      joinRoom(player, roomId);
 
       const requested = clients.get(clientId)?.roomRequested;
 
@@ -141,7 +157,20 @@ export function handleLeaveRoom(clientId: string) {
 
   removePlayer(clientId, roomId);
 
-  if (getRoom(roomId)) broadcastStateToRoom(roomId);
+  if (!getRoom(roomId)) return;
+
+  broadcastStateToRoom(roomId);
+
+  const newMessage: ChatMessage = {
+    id: Date.now(),
+    text: `${clients.get(clientId)?.username} has left the room.`,
+    sender: "server",
+  };
+
+  broadcastToRoom(roomId, {
+    type: MessageType.CHAT_MESSAGE,
+    data: newMessage,
+  });
 }
 
 export function handleKickClient(message: Message) {
@@ -331,6 +360,17 @@ export function handleChangeSettings(clientId: string, msg: Message) {
 
   changeSettings(roomId, msg.data);
   broadcastStateToRoom(roomId);
+
+  const newMessage: ChatMessage = {
+    id: Date.now(),
+    text: "Settings have been changed.",
+    sender: "server",
+  };
+
+  broadcastToRoom(roomId, {
+    type: MessageType.CHAT_MESSAGE,
+    data: newMessage,
+  });
 }
 
 function broadcastToRoom(roomId: string, message: Message) {
@@ -394,7 +434,7 @@ export function handleGameEvent(clientId: string, message: Message) {
   const room = getRoom(roomId) as Room;
 
   switch (gameMessageData.type) {
-    case GameMessage.END_TURN:
+    case GameMessageType.END_TURN:
       room.gameState.endTurn += 1;
 
       if (room.gameState.endTurn >= room.players.length) {
@@ -409,4 +449,25 @@ export function handleGameEvent(clientId: string, message: Message) {
     default:
       throw new Error("Should not be here");
   }
+}
+
+export function handleChatMessage(clientId: string, message: Message) {
+  const msg = message.data;
+
+  if (!msg) throw new Error("No Message received");
+
+  const roomId = clients.get(clientId)?.roomId;
+
+  if (!roomId) throw new Error("Client is not in a room");
+
+  const newMessage: ChatMessage = {
+    id: Date.now(),
+    text: msg,
+    sender: clientId,
+  };
+
+  broadcastToRoom(roomId, {
+    type: MessageType.CHAT_MESSAGE,
+    data: newMessage,
+  });
 }

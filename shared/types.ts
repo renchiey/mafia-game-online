@@ -118,6 +118,7 @@ export enum MessageType {
   REMOVE_ROLE = "remove-role",
   REMOVE_PLAYER = "remove-player",
   CHECK_ROOM = "check-room",
+  CHAT_MESSAGE = "chat-message",
 
   // Server Events
   CONNECTED = "connected",
@@ -138,18 +139,13 @@ export enum MessageType {
 }
 
 export interface GameMessageData {
-  type: GameMessage;
+  type: GameMessageType;
   playerSelected?: string;
   playerSelected2?: string;
   message?: any;
 }
 
-export enum GameMessage {
-  // role turn indicators
-  MAFIOSO_TURN = "mafioso_turn",
-  INVESTIGATOR_TURN = "investigator-turn",
-  DOCTOR_TURN = "doctor-turn",
-  TRANSPORTER_TURN = "transporter-turn",
+export enum GameMessageType {
   END_TURN = "end-turn",
 
   // role actions
@@ -179,3 +175,10 @@ export enum GameRole {
   VETERAN = "Veteran",
   JESTER = "Jester",
 }
+
+export type ChatMessage = {
+  id: number;
+  text: string;
+  sender: string;
+  color?: string;
+};

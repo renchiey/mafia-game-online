@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { WebSocketContext } from "../../contexts/WSContext";
 import {
-  GameMessage,
+  GameMessageType,
   GameMessageData,
   GamePhase,
   MessageType,
@@ -162,7 +162,7 @@ export function Game() {
     send({
       type: MessageType.GAME_EVENT,
       data: {
-        type: GameMessage.END_TURN,
+        type: GameMessageType.END_TURN,
       },
     });
   };

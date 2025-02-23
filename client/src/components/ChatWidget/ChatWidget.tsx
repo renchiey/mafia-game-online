@@ -38,23 +38,32 @@ export function ChatWidget({ players, playerId }: ChatWidgetProps) {
     setInput("");
   };
 
-  const getSenderPrefix = (msg: ChatMessage) => {
-    if (msg.sender === "server") return null;
-
+  const formatMessage = (msg: ChatMessage) => {
     const player = players.find((p) => p.clientId === msg.sender);
 
-    if (!player) throw new Error(`No player with clientId ${msg.sender}`);
+    let messageColor = "";
+    let sender = "";
+    let senderIsCurrentClient = "";
 
-    let color = "text-blue-700";
+    if (msg.sender === "server-error") {
+      messageColor = "text-red-500";
+    }
+
+    if (player) {
+      sender = (player.username as string) + ":";
+
+      if (player.clientId === playerId) senderIsCurrentClient = "text-blue-700";
+    }
 
     return (
-      <span
-        className={
-          "font-bold mr-2 " + (player.clientId === playerId ? color : null)
-        }
-      >
-        {player.username}:
-      </span>
+      <>
+        {sender && (
+          <span className={"font-bold mr-2 " + senderIsCurrentClient}>
+            {sender}
+          </span>
+        )}
+        <span className={messageColor}>{msg.text}</span>
+      </>
     );
   };
 
@@ -63,8 +72,7 @@ export function ChatWidget({ players, playerId }: ChatWidgetProps) {
       <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-2">
         {messages.map((msg) => (
           <div key={msg.id} className="flex items-center p-1 border-b">
-            {getSenderPrefix(msg)}
-            <span>{msg.text}</span>
+            {formatMessage(msg)}
           </div>
         ))}
       </div>

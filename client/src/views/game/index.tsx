@@ -11,6 +11,8 @@ import {
   Settings,
 } from "../../../../shared/types";
 import { Lobby } from "../lobby";
+import { ChatWidget } from "../../components/ChatWidget/ChatWidget";
+import { GameBoard } from "../../components/GameBoard/GameBoard";
 
 export function Game() {
   const [subscribe, unsubscribe, send, connected] =
@@ -18,17 +20,16 @@ export function Game() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [rolesPool, setRolesPool] = useState<Role[]>([]);
   const [settings, setSettings] = useState<Settings>();
-  const [playerId, setPlayerId] = useState<string>("");
-  const [hostId, setHostId] = useState<string>("");
-  const [roomId, setRoomId] = useState<string>("");
-  const [gamePhase, setGamePhase] = useState<GamePhase>();
+  const [playerId, setPlayerId] = useState("");
+  const [hostId, setHostId] = useState("");
+  const [roomId, setRoomId] = useState("");
   const [inGame, setInGame] = useState(false);
 
+  // in game state
+  const [gamePhase, setGamePhase] = useState<GamePhase>();
   const [turnStarted, setTurnStarted] = useState(false);
   const [discussionStarted, setDiscussionStarted] = useState(false);
   const [votingStarted, setVotingStarted] = useState(false);
-
-  // Game over state
   const [gameOver, setGameOver] = useState(false);
 
   const [timer, setTimer] = useState(0);
@@ -80,7 +81,7 @@ export function Game() {
       setTimer(15);
     else if (gamePhase === GamePhase.DISCUSSION) setTimer(60);
 
-    const audio = new Audio(`/narrator/${gamePhase}.mp3`);
+    const audio = new Audio(`/narrator_voicelines/${gamePhase}.mp3`);
     audioRef.current = audio;
 
     audio.addEventListener("ended", handleEnded);
@@ -126,7 +127,7 @@ export function Game() {
     setTurnStarted(true);
 
     turnTimeoutRef.current = setTimeout(() => {
-      const audio = new Audio("/narrator/turn_done.mp3");
+      const audio = new Audio("/narrator_voicelines/turn_done.mp3");
 
       audioRef.current = audio;
 
@@ -159,6 +160,7 @@ export function Game() {
   };
 
   const goNextPhase = () => {
+    console.log("hello");
     send({
       type: MessageType.GAME_EVENT,
       data: {
@@ -167,11 +169,44 @@ export function Game() {
     });
   };
 
-  return inGame ? (
-    <div className="flex flex-col">
-      <div>phase: {gamePhase}</div>
-      <div>timer: {timer}</div>
-    </div>
+  const formatGamePhaseDisplay = (phase: GamePhase) => {
+    switch (phase) {
+      case GamePhase.BEGINNING:
+        return "GAME STARTING";
+      case GamePhase.NIGHT:
+        return "NIGHT TIME";
+      case GamePhase.MAFIOSO_TURN:
+        return "MAFIA'S TURN";
+      case GamePhase.DOCTOR_TURN:
+        return "DOCTOR'S TURN";
+      case GamePhase.INVESTIGATOR_TURN:
+        return "INVESTIGATOR'S TURN";
+      case GamePhase.TRANSPORTER_TURN:
+        return "TRANSPORTER'S TURN";
+      case GamePhase.DISCUSSION:
+        return "DISCUSSION TIME";
+      case GamePhase.VOTING:
+        return "VOTING TIME";
+      default:
+        return "GAME OVER";
+    }
+  };
+
+  return inGame && gamePhase ? (
+    <>
+      <div className="w-full py-5 flex flex-col justify-center items-center">
+        <h2>{gamePhase && formatGamePhaseDisplay(gamePhase)}</h2>
+        <h2>TIME REMAINING: {timer}</h2>
+      </div>
+      <div className="flex w-full h-full justify-center items-center flex-wrap gap-10">
+        <GameBoard
+          players={players}
+          playerId={playerId}
+          gamePhase={gamePhase}
+        />
+        <ChatWidget players={players} playerId={playerId} />
+      </div>
+    </>
   ) : (
     <Lobby
       players={players}

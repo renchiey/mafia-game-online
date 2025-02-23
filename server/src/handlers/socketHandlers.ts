@@ -422,6 +422,35 @@ export function handleStartGame(clientId: string) {
     const client = (clients.get(player.clientId) as Client).ws;
     sendMessage(client, message);
   });
+
+  if (messageType === MessageType.NOT_ENOUGH_PLAYERS) {
+    broadcastToRoom(roomId, {
+      type: MessageType.CHAT_MESSAGE,
+      data: {
+        id: Date.now(),
+        text: "A minimum of 4 players are required to start a game!",
+        sender: "server-error",
+      },
+    });
+  } else if (messageType === MessageType.FILL_ROLE_POOL) {
+    broadcastToRoom(roomId, {
+      type: MessageType.CHAT_MESSAGE,
+      data: {
+        id: Date.now(),
+        text: "Fill up roles pool before starting a game!",
+        sender: "server-error",
+      },
+    });
+  } else {
+    broadcastToRoom(roomId, {
+      type: MessageType.CHAT_MESSAGE,
+      data: {
+        id: Date.now(),
+        text: "Game could not be started for some reason.",
+        sender: "server-error",
+      },
+    });
+  }
 }
 
 export function handleGameEvent(clientId: string, message: Message) {

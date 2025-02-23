@@ -27,17 +27,9 @@ export function Lobby({
 }: LobbyProps) {
   const [subscribe, unsubscribe, send] = useContext(WebSocketContext);
   const [copyFeedback, setCopyFeedback] = useState("");
-  const [startFeedback, setStartFeedback] = useState("");
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [showKickedModal, setShowKickedModal] = useState(false);
   const copyTimeoutRef = useRef<number | null>(null);
-  const startTimeoutRef = useRef<number | null>(null);
-  //const testSound = new Audio("/narrator/mafioso_turn.mp3");
-
-  useEffect(() => {
-    // console.log(testSound);
-    // testSound.play();
-  }, []);
 
   useEffect(() => {
     if (playerId && hostId && playerId === hostId)
@@ -53,14 +45,6 @@ export function Lobby({
 
     subscribe(MessageType.CONNECTED, () => setShowKickedModal(true));
 
-    subscribe(MessageType.NOT_ENOUGH_PLAYERS, () =>
-      showStartFeedback("Not enough players to start game.")
-    );
-
-    subscribe(MessageType.FILL_ROLE_POOL, () =>
-      showStartFeedback("Fill up roles pool before starting.")
-    );
-
     return () => {
       unsubscribe(MessageType.ROLES);
       unsubscribe(MessageType.KICKED);
@@ -70,17 +54,6 @@ export function Lobby({
       unsubscribe(MessageType.FILL_ROLE_POOL);
     };
   }, [subscribe, unsubscribe]);
-
-  const showStartFeedback = (message: string) => {
-    setStartFeedback(message);
-
-    if (startTimeoutRef.current) clearTimeout(startTimeoutRef.current);
-
-    startTimeoutRef.current = setTimeout(() => {
-      setStartFeedback("");
-      startTimeoutRef.current = null;
-    }, 2000);
-  };
 
   const handleCopyLink = () => {
     setCopyFeedback("Invite link copied!");
@@ -147,7 +120,6 @@ export function Lobby({
           Start Game
         </Button>
       </div>
-      <p className=" text-center">{startFeedback}</p>
       <Modal show={showKickedModal} closeModal={() => handleCloseModal()}>
         <h2 className="text-lg font-semibold text-red-600">Disconnected</h2>
         <p className="text-gray-600 mt-2">You have been kicked from the room</p>

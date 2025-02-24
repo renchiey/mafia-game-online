@@ -15,6 +15,7 @@ import {
   changeSettings,
   generateEmptyRoom,
   getRoom,
+  handleAction,
   joinRoom,
   nextPhase,
   removePlayer,
@@ -474,6 +475,32 @@ export function handleGameEvent(clientId: string, message: Message) {
 
         setTimeout(() => broadcastStateToRoom(roomId), 1500);
       }
+      break;
+    case GameMessageType.KILL_VOTE:
+    case GameMessageType.HEAL:
+    case GameMessageType.INVESTIGATE:
+    case GameMessageType.TRANSPORT:
+      const action = message.data;
+
+      const [text, clientsToSendTo] = handleAction(clientId, roomId, action);
+
+      const newMessage: ChatMessage = {
+        id: Date.now(),
+        sender: "server",
+        text: text,
+      };
+
+      console.log(clientsToSendTo);
+      clientsToSendTo.forEach((id) => {
+        console.log("here");
+        const ws = (clients.get(id) as Client).ws;
+
+        sendMessage(ws, {
+          type: MessageType.CHAT_MESSAGE,
+          data: newMessage,
+        });
+      });
+
       break;
     default:
       throw new Error("Should not be here");

@@ -66,17 +66,18 @@ export interface GameState {
   neutrals: Player[];
   gamePhase: GamePhase;
   endTurn: number;
-  killVoted?: string[];
-  transported?: Transported;
-  healed?: string;
-  veteranActive?: boolean;
+  actions: Actions;
   veteranShotsRemaining: number;
 }
 
-export interface Transported {
-  clientOneId: string;
-  clientTwoId: string;
+export interface Actions {
+  killVoted?: Tuple[]; // [player voted to be killed, mafioso]
+  healed?: Tuple[]; // [player to be healed, doctor]
+  transported?: Tuple[]; // [[p1 to swap, p2 to swap], transporter]
+  veteranActive?: Tuple[]; // [is active, veteran]
 }
+
+type Tuple = [any, any];
 
 export interface Room {
   roomId: string;
@@ -141,7 +142,6 @@ export enum MessageType {
 export interface GameMessageData {
   type: GameMessageType;
   playerSelected?: string;
-  playerSelected2?: string;
   message?: any;
 }
 
@@ -150,10 +150,10 @@ export enum GameMessageType {
 
   // role actions
   KILL_VOTE = "kill_vote",
-  UNDO_KILL_VOTE = "undo-kil-vote",
   HEAL = "heal",
   INVESTIGATE = "investigate",
   TRANSPORT = "transport",
+  GO_ALERT = "go-alert",
 
   // phase
   NIGHT_PHASE = "night-phase",

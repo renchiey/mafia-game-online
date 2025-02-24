@@ -1,6 +1,8 @@
 import {
+  Actions,
   AllegianceType,
   DeathType,
+  GameMessageData,
   GameMessageType,
   GamePhase,
   GameRole,
@@ -77,6 +79,7 @@ export function generateEmptyRoom(host: Player) {
       mafia: [],
       towns: [],
       neutrals: [],
+      actions: {},
       endTurn: 0,
       veteranShotsRemaining: 3,
     },
@@ -206,6 +209,7 @@ export function startGame(roomId: string): MessageType {
     mafia: [],
     towns: [],
     neutrals: [],
+    actions: {},
     endTurn: 0,
     veteranShotsRemaining: 3,
   };
@@ -426,6 +430,171 @@ function checkGameOver(roomId: string): GamePhase | null {
   }
 
   return null;
+}
+
+/** returns [chat message, clients to receive message] */
+export function handleAction(
+  clientId: string,
+  roomId: string,
+  action: GameMessageData
+): [string, string[]] {
+  console.log(`Client ${clientId} doing: ${action.type}`);
+
+  const room = rooms.get(roomId) as Room;
+
+  const gameState = room.gameState;
+
+  const playerUsername = room.players.find(
+    (p) => p.clientId === clientId
+  )?.username;
+
+  const target = action.playerSelected as string;
+
+  const targetUsername = action.playerSelected
+    ? room.players.find((p) => p.clientId === action.playerSelected)?.username
+    : "";
+
+  const actionsPerformed = gameState.actions;
+
+  let performedActionAlready = false;
+
+  switch (action.type) {
+    case GameMessageType.KILL_VOTE:
+      if (!actionsPerformed.killVoted) {
+        actionsPerformed.killVoted = [];
+      }
+
+      for (const vote of actionsPerformed.killVoted) {
+        const [votedPlayer, mafiosoPlayer] = vote;
+
+        if (mafiosoPlayer === clientId) {
+          vote[0] = target;
+          performedActionAlready = true;
+        }
+      }
+
+      let sentenceStart;
+      if (room.gameState.mafia.length > 1) {
+        sentenceStart = `${playerUsername} wants`;
+      } else {
+        sentenceStart = "You want";
+      }
+
+      if (performedActionAlready) {
+        return [
+          `${sentenceStart} to kill ${targetUsername} now!`,
+          room.gameState.mafia.map((p) => p.clientId) as string[],
+        ];
+      }
+
+      actionsPerformed.killVoted.push([target, clientId]);
+
+      return [
+        `${sentenceStart} to kill ${targetUsername}!`,
+        room.gameState.mafia.map((p) => p.clientId) as string[],
+      ];
+    case GameMessageType.HEAL:
+      if (!actionsPerformed.healed) {
+        actionsPerformed.healed = [];
+      }
+
+      performedActionAlready = false;
+      for (const healed of actionsPerformed.healed) {
+        const [healedPlayer, doctorPlayer] = healed;
+
+        if (doctorPlayer === clientId) {
+          healed[0] = target;
+          performedActionAlready = true;
+        }
+      }
+
+      if (performedActionAlready) {
+        return [`You decided to heal ${targetUsername} instead.`, [clientId]];
+      }
+
+      actionsPerformed.healed.push([target, clientId]);
+
+      return [`You decided to heal ${targetUsername}.`, [clientId]];
+    case GameMessageType.INVESTIGATE:
+      const targetRole = room.players.find((p) => p.clientId === target)
+        ?.gameData?.role as Role;
+
+      let grammar = "a";
+      if (["a", "e", "i", "o", "u"].includes(targetRole.name[0].toLowerCase()))
+        grammar = "an";
+
+      return [
+        `You investigated ${targetUsername} and they were ${grammar} ${targetRole.name}!`,
+        [clientId],
+      ];
+    case GameMessageType.TRANSPORT:
+      if (!actionsPerformed.transported) {
+        actionsPerformed.transported = [];
+      }
+
+      performedActionAlready = false;
+
+      let twoPlayersSelected = false;
+
+      let swappedPlayers = ["", ""];
+
+      for (const transported of actionsPerformed.transported) {
+        const [transportedPlayers, transporterPlayer] = transported;
+
+        const [p1, p2] = transportedPlayers;
+
+        if (transporterPlayer === clientId) {
+          if (p1 && p2) {
+            transported[0] = [p2, target];
+
+            swappedPlayers = [p2, target];
+
+            twoPlayersSelected = true;
+          } else {
+            transported[0] = [p1, target];
+
+            swappedPlayers = [p1, target];
+
+            twoPlayersSelected = true;
+          }
+        }
+      }
+
+      if (!twoPlayersSelected) {
+        actionsPerformed.transported.push([[target, null], clientId]);
+        return [`You have selected ${targetUsername}.`, [clientId]];
+      }
+
+      const p1Username = room.players.find(
+        (p) => p.clientId === swappedPlayers[0]
+      )?.username;
+      const p2Username = room.players.find(
+        (p) => p.clientId === swappedPlayers[1]
+      )?.username;
+
+      return [
+        `You decided to swap ${p1Username} with ${p2Username}.`,
+        [clientId],
+      ];
+    default:
+      throw new Error(`${action.type} has not been implemented yet.`);
+  }
+}
+
+function processNightOutcome(roomId: string) {
+  const room = rooms.get(roomId) as Room;
+
+  const gameState = room.gameState;
+
+  const actions = gameState.actions;
+
+  if (actions.transported) {
+  }
+
+  if (actions.killVoted) {
+    if (actions.healed) {
+    }
+  }
 }
 
 function roomHasRole(roomId: string, role: GameRole) {

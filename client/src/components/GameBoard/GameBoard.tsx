@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import {
   AllegianceType,
+  GameMessageData,
+  GameMessageType,
   GamePhase,
   GameRole,
+  Message,
+  MessageType,
   Player,
   Role,
 } from "../../../../shared/types";
@@ -12,20 +16,22 @@ interface GameBoardProps {
   players: Player[];
   playerId: string;
   gamePhase: GamePhase;
+  send: (data: Message) => void;
 }
 
 type Revealed = [string, string]; // [clientId, color]
 
-export const GameBoard = ({ players, playerId, gamePhase }: GameBoardProps) => {
+export const GameBoard = ({
+  players,
+  playerId,
+  gamePhase,
+  send,
+}: GameBoardProps) => {
   const [role, setRole] = useState<Role>();
 
   const [revealed, setRevealed] = useState<Revealed[]>([]);
   const [playersTurn, setPlayersTurn] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player>();
-  const [player1ToPerformActionOn, setPlayer1ToPerformActionOn] =
-    useState<Player>();
-  const [player2ToPerformActionOn, setPlayer2ToPerformActionOn] =
-    useState<Player>();
 
   useEffect(() => {
     const player = players.find((p) => p.clientId === playerId) as Player;
@@ -126,6 +132,34 @@ export const GameBoard = ({ players, playerId, gamePhase }: GameBoardProps) => {
 
   const performAction = () => {
     if (!selectedPlayer) return;
+
+    const action: GameMessageData = {
+      type: GameMessageType.KILL_VOTE,
+      playerSelected: selectedPlayer.clientId,
+    };
+
+    switch (role?.name) {
+      case GameRole.MAFIOSO:
+        action.type = GameMessageType.KILL_VOTE;
+        break;
+      case GameRole.DOCTOR:
+        action.type = GameMessageType.HEAL;
+        break;
+      case GameRole.INVESTIGATOR:
+        setPlayersTurn(false);
+        action.type = GameMessageType.INVESTIGATE;
+        break;
+      case GameRole.TRANSPORTER:
+        action.type = GameMessageType.TRANSPORT;
+        break;
+      default:
+        throw new Error("ROLE HAS NO PERFORMABLE ACTION");
+    }
+
+    send({
+      type: MessageType.GAME_EVENT,
+      data: action,
+    });
   };
 
   return (

@@ -203,6 +203,7 @@ export function Game() {
           players={players}
           playerId={playerId}
           gamePhase={gamePhase}
+          send={send}
         />
         <ChatWidget players={players} playerId={playerId} />
       </div>

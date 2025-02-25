@@ -12,6 +12,7 @@ import {
   Room,
   Settings,
   SettingsOptions,
+  Tuple,
 } from "../../../shared/types";
 import { MessageType } from "../../../shared/types";
 import { getClientRoomId, removeClientFromRoom } from "./socketHandlers";
@@ -404,8 +405,8 @@ function checkGameOver(roomId: string): GamePhase | null {
   let jester_lynched = false;
   room.gameState.neutrals.forEach((player) => {
     if (
-      player.gameData?.dead &&
-      player.gameData.role.name === GameRole.JESTER &&
+      player.gameData.dead &&
+      player.gameData.role?.name === GameRole.JESTER &&
       player.gameData.dead === DeathType.LYNCHED
     )
       jester_lynched = true;
@@ -588,13 +589,94 @@ function processNightOutcome(roomId: string) {
 
   const actions = gameState.actions;
 
-  if (actions.transported) {
-  }
+  const outcomeTexts: string[] = [];
+
+  const died: string[] = [];
 
   if (actions.killVoted) {
-    if (actions.healed) {
+    let [target, attacker] =
+      actions.killVoted[Math.floor(Math.random()) * actions.killVoted.length];
+
+    // if target was swapped, set target to swapped player
+    if (actions.transported) {
+      actions.transported.forEach((t) => {
+        const swapped = t[0];
+
+        if (swapped[0] === target) {
+          target = swapped[1];
+        }
+
+        if (swapped[1] === target) {
+          target = swapped[0];
+        }
+      });
+    }
+
+    // if target was an active veteran
+    const veteranAttacked = actions.veteranActive
+      ? actions.veteranActive.find((p) => p === target[0])
+      : undefined;
+
+    if (veteranAttacked) {
+      died.push(attacker);
+    } else {
+      died.push(target);
     }
   }
+
+  if (actions.healed) {
+    actions.healed.forEach((healed) => {
+      let [target, docter] = healed;
+
+      // if target was swapped, set target to swapped player
+      if (actions.transported) {
+        actions.transported.forEach((t) => {
+          const swapped = t[0];
+
+          if (swapped[0] === target) {
+            target = swapped[1];
+          }
+
+          if (swapped[1] === target) {
+            target = swapped[0];
+          }
+        });
+      }
+
+      // if target was dead, remove them from list of dead
+      const dead = died.findIndex(target);
+      if (dead >= 0) {
+        died.splice(dead, 1);
+
+        const targetName = (
+          room.players.find((p) => p.clientId === target) as Player
+        ).username;
+
+        outcomeTexts.push(
+          `${targetName} was attacked last night, but was saved by a Doctor.`
+        );
+      }
+
+      // if target was an active veteran
+      const veteranAttacked = actions.veteranActive
+        ? actions.veteranActive.find((p) => p === target[0])
+        : undefined;
+
+      if (veteranAttacked) {
+        died.push(docter);
+      }
+    });
+  }
+
+  for (const pId of died) {
+    const player = room.players.find((p) => p.clientId === pId) as Player;
+
+    player.gameData.dead = DeathType.KILLED;
+
+    outcomeTexts.push(`${player.username} died last night.`);
+  }
+
+  return outcomeTexts;
 }
 
 function roomHasRole(roomId: string, role: GameRole) {

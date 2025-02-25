@@ -79,6 +79,7 @@ export function handleJoinRoom(
 ) {
   const player: Player = {
     clientId,
+    gameData: {},
   };
 
   let roomId = message.data;

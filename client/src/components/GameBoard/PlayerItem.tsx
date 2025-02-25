@@ -47,7 +47,6 @@ export const PlayerItem = ({
 
   return (
     <div
-      key={player.clientId}
       className={
         " m-2 w-[120px] relative md:w-[150px] aspect-square rounded-2xl shadow-xl   flex flex-col justify-center items-center" +
         (player.clientId === playerId

@@ -19,8 +19,8 @@ export interface Role {
 export interface Player {
   clientId: string;
   username?: string;
-  gameData?: {
-    role: Role;
+  gameData: {
+    role?: Role;
     dead?: DeathType;
   };
 }
@@ -74,10 +74,10 @@ export interface Actions {
   killVoted?: Tuple[]; // [player voted to be killed, mafioso]
   healed?: Tuple[]; // [player to be healed, doctor]
   transported?: Tuple[]; // [[p1 to swap, p2 to swap], transporter]
-  veteranActive?: Tuple[]; // [is active, veteran]
+  veteranActive?: string[]; // [veteran]
 }
 
-type Tuple = [any, any];
+export type Tuple = [any, any];
 
 export interface Room {
   roomId: string;

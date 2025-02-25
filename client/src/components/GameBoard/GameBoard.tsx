@@ -45,7 +45,7 @@ export const GameBoard = ({
       players.forEach((player) => {
         if (
           player.clientId !== playerId &&
-          player.gameData?.role.allegiance.name === AllegianceType.MAFIA
+          player.gameData.role?.allegiance.name === AllegianceType.MAFIA
         ) {
           tempRevealed.push([player.clientId, getColor(tempRole)]);
         }
@@ -90,7 +90,7 @@ export const GameBoard = ({
       !playersTurn ||
       player.clientId === playerId ||
       (role?.allegiance.name === AllegianceType.MAFIA &&
-        player.gameData?.role.allegiance.name === AllegianceType.MAFIA)
+        player.gameData.role?.allegiance.name === AllegianceType.MAFIA)
     )
       return;
 
@@ -124,7 +124,7 @@ export const GameBoard = ({
     return (
       <p>
         {"<"}
-        <span className={color}>{player.gameData?.role.name}</span>
+        <span className={color}>{player.gameData.role?.name}</span>
         {">"}
       </p>
     );
@@ -167,6 +167,7 @@ export const GameBoard = ({
       <div className="flex flex-wrap bg-white justify-center rounded-2xl">
         {players.map((player) => (
           <PlayerItem
+            key={player.clientId}
             player={player}
             playerId={playerId}
             currentPlayerRole={role}

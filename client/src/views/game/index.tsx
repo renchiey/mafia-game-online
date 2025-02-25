@@ -160,7 +160,6 @@ export function Game() {
   };
 
   const goNextPhase = () => {
-    console.log("hello");
     send({
       type: MessageType.GAME_EVENT,
       data: {

@@ -261,11 +261,9 @@ export function endGame(roomId: string) {
   room.gameStarted = false;
 }
 
-export function nextPhase(roomId: string): [GamePhase, number] {
+export function nextPhase(roomId: string): GamePhase {
   /**
    * Gets the next phase for an active game.
-   *
-   * Returns the time (ms) it should take for the phase to end
    */
   const room = rooms.get(roomId) as Room;
 
@@ -273,46 +271,40 @@ export function nextPhase(roomId: string): [GamePhase, number] {
   let timeout: number = 0;
   switch (room.gameState.gamePhase) {
     case GamePhase.BEGINNING:
-      [phase, timeout] = transitionPhaseHelper(roomId, 0);
+      phase = transitionPhaseHelper(roomId, 0);
       break;
     case GamePhase.NIGHT:
-      [phase, timeout] = transitionPhaseHelper(roomId, 1);
+      phase = transitionPhaseHelper(roomId, 1);
       break;
     case GamePhase.MAFIOSO_TURN:
-      [phase, timeout] = transitionPhaseHelper(roomId, 2);
+      phase = transitionPhaseHelper(roomId, 2);
       break;
     case GamePhase.DOCTOR_TURN:
-      [phase, timeout] = transitionPhaseHelper(roomId, 3);
+      phase = transitionPhaseHelper(roomId, 3);
       break;
     case GamePhase.INVESTIGATOR_TURN:
-      [phase, timeout] = transitionPhaseHelper(roomId, 4);
+      phase = transitionPhaseHelper(roomId, 4);
       break;
     case GamePhase.TRANSPORTER_TURN:
-      [phase, timeout] = transitionPhaseHelper(roomId, 5);
+      phase = transitionPhaseHelper(roomId, 5);
       break;
+    case GamePhase.NIGHT_OUTCOME:
     case GamePhase.DISCUSSION:
-      [phase, timeout] = transitionPhaseHelper(roomId, 6);
-      break;
     case GamePhase.VOTING:
-      [phase, timeout] = transitionPhaseHelper(roomId, 7);
+      phase = transitionPhaseHelper(roomId, 6);
       break;
     default:
-      [phase, timeout] = [GamePhase.BEGINNING, 0];
+      phase = GamePhase.BEGINNING;
 
       endGame(roomId);
   }
 
-  return [phase, timeout];
+  return phase;
 }
 
-function transitionPhaseHelper(
-  roomId: string,
-  pass: number
-): [GamePhase, number] {
+function transitionPhaseHelper(roomId: string, pass: number): GamePhase {
   /**
    * Helper function to transition game state to next phase
-   *
-   * Returns the time (ms) it should take for the phase to end
    */
   const room = rooms.get(roomId) as Room;
 
@@ -322,71 +314,76 @@ function transitionPhaseHelper(
     const gameOver = checkGameOver(roomId);
 
     if (gameOver) {
-      return [gameOver, 0];
+      return gameOver;
     }
     room.gameState.gamePhase = GamePhase.NIGHT;
 
-    return [GamePhase.NIGHT, STAGGER_TIMEOUT];
+    return GamePhase.NIGHT;
   }
 
   if (pass <= 1 && roomHasRole(roomId, GameRole.MAFIOSO)) {
+    // Mafioso turn
     phase = GamePhase.MAFIOSO_TURN;
 
     room.gameState.gamePhase = phase;
   } else if (pass <= 2 && roomHasRole(roomId, GameRole.DOCTOR)) {
+    // Doctor turn
     phase = GamePhase.DOCTOR_TURN;
 
     room.gameState.gamePhase = phase;
   } else if (pass <= 3 && roomHasRole(roomId, GameRole.INVESTIGATOR)) {
+    // Investigator Turn
     phase = GamePhase.INVESTIGATOR_TURN;
 
     room.gameState.gamePhase = phase;
   } else if (pass <= 4 && roomHasRole(roomId, GameRole.TRANSPORTER)) {
+    // Transporter Turn
     phase = GamePhase.TRANSPORTER_TURN;
 
     room.gameState.gamePhase = phase;
   }
 
-  if (phase)
-    return [phase, Math.round(TURN_TIMEOUT * (1 / room.settings.roundSpeed))];
-
-  let timeout: number;
+  if (phase) return phase;
 
   if (pass <= 5) {
+    // Reveal night outcome phase
+    phase = GamePhase.NIGHT_OUTCOME;
+
+    room.gameState.gamePhase = phase;
+  } else if (room.gameState.gamePhase === GamePhase.NIGHT_OUTCOME) {
+    // Discussion phase
     const gameOver = checkGameOver(roomId);
 
     if (gameOver) {
-      return [gameOver, 0];
+      return gameOver;
     }
 
     phase = GamePhase.DISCUSSION;
 
     room.gameState.gamePhase = phase;
-
-    timeout = DISCUSSION_TIMEOUT;
-  } else if (pass <= 6) {
+  } else if (room.gameState.gamePhase === GamePhase.DISCUSSION) {
+    // Voting phase
     phase = GamePhase.VOTING;
 
     room.gameState.gamePhase = phase;
-
-    timeout = VOTING_TIMEOUT;
   } else {
+    // Night phase
     const gameOver = checkGameOver(roomId);
 
     if (gameOver) {
-      return [gameOver, 0];
+      return gameOver;
     }
 
     phase = GamePhase.NIGHT;
 
     room.gameState.gamePhase = phase;
 
-    room.gameState.round++;
+    room.gameState.actions = {}; // resetting actions
 
-    timeout = STAGGER_TIMEOUT;
+    room.gameState.round++;
   }
 
-  return [phase, timeout];
+  return phase;
 }
 
 function checkGameOver(roomId: string): GamePhase | null {
@@ -582,7 +579,7 @@ export function handleAction(
   }
 }
 
-function processNightOutcome(roomId: string) {
+export function processNightOutcome(roomId: string) {
   const room = rooms.get(roomId) as Room;
 
   const gameState = room.gameState;
@@ -599,6 +596,8 @@ function processNightOutcome(roomId: string) {
 
     // if target was swapped, set target to swapped player
     if (actions.transported) {
+      console.log(`target ${target}`);
+      console.log(`transported ${actions.transported}`);
       actions.transported.forEach((t) => {
         const swapped = t[0];
 
@@ -644,7 +643,7 @@ function processNightOutcome(roomId: string) {
       }
 
       // if target was dead, remove them from list of dead
-      const dead = died.findIndex(target);
+      const dead = died.findIndex((d) => d === target);
       if (dead >= 0) {
         died.splice(dead, 1);
 

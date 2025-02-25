@@ -18,6 +18,7 @@ import {
   handleAction,
   joinRoom,
   nextPhase,
+  processNightOutcome,
   removePlayer,
   removeRole,
   setName,
@@ -470,11 +471,26 @@ export function handleGameEvent(clientId: string, message: Message) {
 
       if (room.gameState.endTurn >= room.players.length) {
         room.gameState.endTurn = 0;
-        const [p, t] = nextPhase(roomId);
+        const p = nextPhase(roomId);
 
         console.log(`[GAME EVENT] Going to next phase ${p}`);
 
         setTimeout(() => broadcastStateToRoom(roomId), 1500);
+
+        if (p === GamePhase.NIGHT_OUTCOME) {
+          const texts = processNightOutcome(roomId);
+
+          texts.forEach((text) => {
+            broadcastToRoom(roomId, {
+              type: MessageType.CHAT_MESSAGE,
+              data: {
+                id: Date.now(),
+                sender: "server",
+                text: text,
+              },
+            });
+          });
+        }
       }
       break;
     case GameMessageType.KILL_VOTE:

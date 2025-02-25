@@ -107,19 +107,24 @@ export function Game() {
   }, [timer, votingStarted, discussionStarted, turnStarted]);
 
   const handleEnded = () => {
-    if (
-      gamePhase === GamePhase.MAFIOSO_TURN ||
-      gamePhase === GamePhase.DOCTOR_TURN ||
-      gamePhase === GamePhase.INVESTIGATOR_TURN ||
-      gamePhase === GamePhase.TRANSPORTER_TURN
-    ) {
-      startTurn();
-    } else if (gamePhase === GamePhase.DISCUSSION) {
-      startDiscussion();
-    } else if (gamePhase === GamePhase.VOTING) {
-      startVoting();
-    } else {
-      goNextPhase();
+    switch (gamePhase) {
+      case GamePhase.MAFIOSO_TURN:
+      case GamePhase.DOCTOR_TURN:
+      case GamePhase.INVESTIGATOR_TURN:
+      case GamePhase.TRANSPORTER_TURN:
+        startTurn();
+        break;
+      case GamePhase.NIGHT_OUTCOME:
+        setTimeout(() => goNextPhase(), 3500);
+        break;
+      case GamePhase.DISCUSSION:
+        startDiscussion();
+        break;
+      case GamePhase.VOTING:
+        startVoting();
+        break;
+      default:
+        goNextPhase();
     }
   };
 
@@ -182,6 +187,8 @@ export function Game() {
         return "INVESTIGATOR'S TURN";
       case GamePhase.TRANSPORTER_TURN:
         return "TRANSPORTER'S TURN";
+      case GamePhase.NIGHT_OUTCOME:
+        return "NIGHT OUTCOME";
       case GamePhase.DISCUSSION:
         return "DISCUSSION TIME";
       case GamePhase.VOTING:

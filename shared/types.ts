@@ -45,6 +45,7 @@ export enum GamePhase {
   INVESTIGATOR_TURN = "investigator_turn",
   DOCTOR_TURN = "doctor_turn",
   TRANSPORTER_TURN = "transporter_turn",
+  NIGHT_OUTCOME = "night_outcome",
   DISCUSSION = "discussion_time",
   VOTING = "voting_time",
 
@@ -180,5 +181,4 @@ export type ChatMessage = {
   id: number;
   text: string;
   sender: string;
-  color?: string;
 };

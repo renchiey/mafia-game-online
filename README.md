@@ -1,10 +1,6 @@
 # Mafia Card Game Online
 
-### Problem
-The limiting factor of playing the Mafia card game is that one player has to sit out from the game to narrate it and keep track of each players actions.
-
-### Solution
-This web app :)
+> Web version of the Mafia card game. Eliminates the need for a game master.
 
 ## Technologies/libraries used
 ### Client Side
@@ -21,3 +17,7 @@ This web app :)
 - Express
 - TypeScript
 - WebSockets
+
+### Known bugs
+- Narration mp3 file sometimes fails to load.
+  - Likely a chrome bug. Client must restart their browser for now.

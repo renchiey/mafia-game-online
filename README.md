@@ -20,5 +20,5 @@
 
 ### Bugs
 > list of known bugs
-1. Narration mp3 file sometimes fails to load.
+- Narration mp3 file sometimes fails to load.
   - Likely a chrome bug. Client must restart their browser for now.

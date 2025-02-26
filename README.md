@@ -18,6 +18,4 @@
 - TypeScript
 - WebSockets
 
-### Known bugs
-- Narration mp3 file sometimes fails to load [fixed].
-  - Likely a chrome bug. Client must restart their browser for now.
+

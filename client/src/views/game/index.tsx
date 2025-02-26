@@ -13,6 +13,7 @@ import {
 import { Lobby } from "../lobby";
 import { ChatWidget } from "../../components/ChatWidget/ChatWidget";
 import { GameBoard } from "../../components/GameBoard/GameBoard";
+import { loadAudioFiles } from "../../utils/helper";
 
 export function Game() {
   const [subscribe, unsubscribe, send, connected] =
@@ -24,6 +25,10 @@ export function Game() {
   const [hostId, setHostId] = useState("");
   const [roomId, setRoomId] = useState("");
   const [inGame, setInGame] = useState(false);
+  const [audioMap, setAudioMap] = useState<Map<
+    string,
+    HTMLAudioElement
+  > | null>(null);
 
   // in game state
   const [gamePhase, setGamePhase] = useState<GamePhase>();
@@ -40,6 +45,31 @@ export function Game() {
   useEffect(() => {
     // Get initial room data
     send({ type: MessageType.GET_STATE });
+
+    const path = "/narrator_voicelines/";
+    const audioPaths: Record<string, string> = {};
+
+    // Pre-load audio files
+    audioPaths[GamePhase.NIGHT] = `${path}${GamePhase.NIGHT}.mp3`;
+    audioPaths[GamePhase.MAFIOSO_TURN] = `${path}${GamePhase.MAFIOSO_TURN}.mp3`;
+    audioPaths[GamePhase.DOCTOR_TURN] = `${path}${GamePhase.DOCTOR_TURN}.mp3`;
+    audioPaths[
+      GamePhase.INVESTIGATOR_TURN
+    ] = `${path}${GamePhase.INVESTIGATOR_TURN}.mp3`;
+    audioPaths[
+      GamePhase.TRANSPORTER_TURN
+    ] = `${path}${GamePhase.TRANSPORTER_TURN}.mp3`;
+    audioPaths[
+      GamePhase.NIGHT_OUTCOME
+    ] = `${path}${GamePhase.NIGHT_OUTCOME}.mp3`;
+    audioPaths[GamePhase.DISCUSSION] = `${path}${GamePhase.DISCUSSION}.mp3`;
+    audioPaths[GamePhase.VOTING] = `${path}${GamePhase.VOTING}.mp3`;
+    audioPaths[GamePhase.MAFIA_WIN] = `${path}${GamePhase.MAFIA_WIN}.mp3`;
+    audioPaths[GamePhase.TOWNS_WIN] = `${path}${GamePhase.TOWNS_WIN}.mp3`;
+    audioPaths[GamePhase.JESTER_WIN] = `${path}${GamePhase.JESTER_WIN}.mp3`;
+    audioPaths["turn_done"] = `${path}turn_done.mp3`;
+
+    loadAudioFiles(audioPaths).then(setAudioMap).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -81,7 +111,13 @@ export function Game() {
       setTimer(15);
     else if (gamePhase === GamePhase.DISCUSSION) setTimer(60);
 
-    const audio = new Audio(`/narrator_voicelines/${gamePhase}.mp3`);
+    if (!audioMap) {
+      handleError();
+      return;
+    }
+
+    const audio = audioMap.get(gamePhase) as HTMLAudioElement;
+
     audioRef.current = audio;
 
     audio.addEventListener("ended", handleEnded);
@@ -89,7 +125,7 @@ export function Game() {
 
     return () => {
       if (audioRef.current) {
-        audioRef.current.removeEventListener("ended", handleEnded);
+        audio.removeEventListener("ended", handleEnded);
         audioRef.current.removeEventListener("ended", goNextPhase);
       }
       clearTimeout(turnTimeoutRef.current);
@@ -105,6 +141,11 @@ export function Game() {
 
     return () => clearInterval(interval);
   }, [timer, votingStarted, discussionStarted, turnStarted]);
+
+  const handleError = () => {
+    console.log("error");
+    setTimeout(() => handleEnded, 2000);
+  };
 
   const handleEnded = () => {
     switch (gamePhase) {
@@ -132,7 +173,7 @@ export function Game() {
     setTurnStarted(true);
 
     turnTimeoutRef.current = setTimeout(() => {
-      const audio = new Audio("/narrator_voicelines/turn_done.mp3");
+      const audio = audioMap?.get("turn_done") as HTMLAudioElement;
 
       audioRef.current = audio;
 

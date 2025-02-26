@@ -28,3 +28,31 @@ export function instanceOfMessage(object: any): object is Message {
 export function changeURL(newPath: string) {
   history.pushState({}, "", newPath);
 }
+
+export const loadAudioFiles = async (
+  fileMap: Record<string, string>
+): Promise<Map<string, HTMLAudioElement>> => {
+  const audioMap = new Map<string, HTMLAudioElement>();
+
+  const audioPromises = Object.entries(fileMap).map(([key, path]) => {
+    return new Promise<void>((resolve, reject) => {
+      const audio = new Audio(path);
+      audio.addEventListener(
+        "canplaythrough",
+        () => {
+          audioMap.set(key, audio);
+          resolve();
+        },
+        { once: true }
+      );
+      audio.addEventListener(
+        "error",
+        () => reject(new Error(`Failed to load: ${path}`)),
+        { once: true }
+      );
+    });
+  });
+
+  await Promise.all(audioPromises);
+  return audioMap;
+};

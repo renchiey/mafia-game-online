@@ -116,6 +116,11 @@ export function Game() {
       return;
     }
 
+    if (gamePhase === GamePhase.VOTING_OUTCOME) {
+      handleEnded();
+      return;
+    }
+
     const audio = audioMap.get(gamePhase) as HTMLAudioElement;
 
     audioRef.current = audio;
@@ -164,6 +169,9 @@ export function Game() {
       case GamePhase.VOTING:
         startVoting();
         break;
+      case GamePhase.VOTING_OUTCOME:
+        setTimeout(() => goNextPhase(), 3500);
+        break;
       default:
         goNextPhase();
     }
@@ -197,6 +205,7 @@ export function Game() {
 
   const startVoting = () => {
     setVotingStarted(true);
+    setTimer(10);
 
     turnTimeoutRef.current = setTimeout(() => {
       goNextPhase();

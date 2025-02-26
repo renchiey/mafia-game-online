@@ -19,6 +19,7 @@ import {
   joinRoom,
   nextPhase,
   processNightOutcome,
+  processVotingOutcome,
   removePlayer,
   removeRole,
   setName,
@@ -477,6 +478,19 @@ export function handleGameEvent(clientId: string, message: Message) {
 
         setTimeout(() => broadcastStateToRoom(roomId), 1500);
 
+        if (p === GamePhase.VOTING_OUTCOME) {
+          const text = processVotingOutcome(roomId);
+
+          broadcastToRoom(roomId, {
+            type: MessageType.CHAT_MESSAGE,
+            data: {
+              id: Date.now(),
+              sender: "server",
+              text: text,
+            },
+          });
+        }
+
         if (p === GamePhase.NIGHT_OUTCOME) {
           const texts = processNightOutcome(roomId);
 
@@ -497,6 +511,7 @@ export function handleGameEvent(clientId: string, message: Message) {
     case GameMessageType.HEAL:
     case GameMessageType.INVESTIGATE:
     case GameMessageType.TRANSPORT:
+    case GameMessageType.VOTE_LYNCH:
       const action = message.data;
 
       const [text, clientsToSendTo] = handleAction(clientId, roomId, action);
@@ -507,9 +522,7 @@ export function handleGameEvent(clientId: string, message: Message) {
         text: text,
       };
 
-      console.log(clientsToSendTo);
       clientsToSendTo.forEach((id) => {
-        console.log("here");
         const ws = (clients.get(id) as Client).ws;
 
         sendMessage(ws, {
@@ -520,7 +533,7 @@ export function handleGameEvent(clientId: string, message: Message) {
 
       break;
     default:
-      throw new Error("Should not be here");
+      throw new Error(`Should not be here ${gameMessageData}`);
   }
 }
 

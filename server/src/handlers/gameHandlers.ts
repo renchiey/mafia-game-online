@@ -81,6 +81,7 @@ export function generateEmptyRoom(host: Player) {
       towns: [],
       neutrals: [],
       actions: {},
+      votes: {},
       endTurn: 0,
       veteranShotsRemaining: 3,
     },
@@ -212,6 +213,7 @@ export function startGame(roomId: string): MessageType {
     neutrals: [],
     actions: {},
     endTurn: 0,
+    votes: {},
     veteranShotsRemaining: 3,
   };
 
@@ -308,8 +310,6 @@ function transitionPhaseHelper(roomId: string, pass: number): GamePhase {
    */
   const room = rooms.get(roomId) as Room;
 
-  let phase: GamePhase | null = null;
-
   if (pass === 0) {
     const gameOver = checkGameOver(roomId);
 
@@ -321,35 +321,32 @@ function transitionPhaseHelper(roomId: string, pass: number): GamePhase {
     return GamePhase.NIGHT;
   }
 
+  let turnPhase = false;
+
   if (pass <= 1 && roomHasRole(roomId, GameRole.MAFIOSO)) {
     // Mafioso turn
-    phase = GamePhase.MAFIOSO_TURN;
+    turnPhase = true;
 
-    room.gameState.gamePhase = phase;
+    room.gameState.gamePhase = GamePhase.MAFIOSO_TURN;
   } else if (pass <= 2 && roomHasRole(roomId, GameRole.DOCTOR)) {
     // Doctor turn
-    phase = GamePhase.DOCTOR_TURN;
-
-    room.gameState.gamePhase = phase;
+    turnPhase = true;
+    room.gameState.gamePhase = GamePhase.DOCTOR_TURN;
   } else if (pass <= 3 && roomHasRole(roomId, GameRole.INVESTIGATOR)) {
     // Investigator Turn
-    phase = GamePhase.INVESTIGATOR_TURN;
-
-    room.gameState.gamePhase = phase;
+    turnPhase = true;
+    room.gameState.gamePhase = GamePhase.INVESTIGATOR_TURN;
   } else if (pass <= 4 && roomHasRole(roomId, GameRole.TRANSPORTER)) {
     // Transporter Turn
-    phase = GamePhase.TRANSPORTER_TURN;
-
-    room.gameState.gamePhase = phase;
+    turnPhase = true;
+    room.gameState.gamePhase = GamePhase.TRANSPORTER_TURN;
   }
 
-  if (phase) return phase;
+  if (turnPhase) return room.gameState.gamePhase;
 
   if (pass <= 5) {
     // Reveal night outcome phase
-    phase = GamePhase.NIGHT_OUTCOME;
-
-    room.gameState.gamePhase = phase;
+    room.gameState.gamePhase = GamePhase.NIGHT_OUTCOME;
   } else if (room.gameState.gamePhase === GamePhase.NIGHT_OUTCOME) {
     // Discussion phase
     const gameOver = checkGameOver(roomId);
@@ -357,15 +354,14 @@ function transitionPhaseHelper(roomId: string, pass: number): GamePhase {
     if (gameOver) {
       return gameOver;
     }
-
-    phase = GamePhase.DISCUSSION;
-
-    room.gameState.gamePhase = phase;
+    room.gameState.gamePhase = GamePhase.DISCUSSION;
   } else if (room.gameState.gamePhase === GamePhase.DISCUSSION) {
     // Voting phase
-    phase = GamePhase.VOTING;
+    room.gameState.gamePhase = GamePhase.VOTING;
+  } else if (room.gameState.gamePhase === GamePhase.VOTING) {
+    // Voting outcome phase
 
-    room.gameState.gamePhase = phase;
+    room.gameState.gamePhase = GamePhase.VOTING_OUTCOME;
   } else {
     // Night phase
     const gameOver = checkGameOver(roomId);
@@ -373,17 +369,14 @@ function transitionPhaseHelper(roomId: string, pass: number): GamePhase {
     if (gameOver) {
       return gameOver;
     }
-
-    phase = GamePhase.NIGHT;
-
-    room.gameState.gamePhase = phase;
+    room.gameState.gamePhase = GamePhase.NIGHT;
 
     room.gameState.actions = {}; // resetting actions
 
     room.gameState.round++;
   }
 
-  return phase;
+  return room.gameState.gamePhase;
 }
 
 function checkGameOver(roomId: string): GamePhase | null {
@@ -391,12 +384,12 @@ function checkGameOver(roomId: string): GamePhase | null {
 
   let mafia_alive = 0;
   room.gameState.mafia.forEach((player) => {
-    if (!player.gameData?.dead) mafia_alive++;
+    if (player.gameData.dead === undefined) mafia_alive++;
   });
 
   let towns_alive = 0;
   room.gameState.towns.forEach((player) => {
-    if (!player.gameData?.dead) towns_alive++;
+    if (player.gameData.dead === undefined) towns_alive++;
   });
 
   let jester_lynched = false;
@@ -457,6 +450,21 @@ export function handleAction(
   let performedActionAlready = false;
 
   switch (action.type) {
+    case GameMessageType.VOTE_LYNCH:
+      if (clientId in gameState.votes) {
+        gameState.votes[clientId] = target;
+
+        return [
+          `${playerUsername} changed their vote to ${targetUsername}.`,
+          room.players.map((p) => p.clientId),
+        ];
+      }
+
+      gameState.votes[clientId] = target;
+      return [
+        `${playerUsername} voted to lynch ${targetUsername}.`,
+        room.players.map((p) => p.clientId),
+      ];
     case GameMessageType.KILL_VOTE:
       if (!actionsPerformed.killVoted) {
         actionsPerformed.killVoted = [];
@@ -676,6 +684,42 @@ export function processNightOutcome(roomId: string) {
   }
 
   return outcomeTexts;
+}
+
+export function processVotingOutcome(roomId: string) {
+  const room = rooms.get(roomId) as Room;
+
+  const votes = room.gameState.votes;
+
+  const tally: Record<string, number> = {};
+
+  for (const [pId, voteeId] of Object.entries(votes)) {
+    if (!(voteeId in tally)) tally[voteeId] = 0;
+
+    tally[voteeId] += 1;
+  }
+
+  let highest = null;
+  let tiedPlayer = null;
+  for (const [pId, count] of Object.entries(tally)) {
+    {
+      if (!highest) highest = pId;
+      else if (tally[highest] < count) highest = pId;
+      else if (tally[highest] === count) tiedPlayer = pId;
+    }
+  }
+
+  if (tiedPlayer && highest && tally[tiedPlayer] === tally[highest]) {
+    return "No one was voted off today.";
+  }
+
+  const voteePlayer = room.players.find(
+    (p) => p.clientId === highest
+  ) as Player;
+
+  voteePlayer.gameData.dead = DeathType.LYNCHED;
+
+  return `${voteePlayer.username} was voted off.`;
 }
 
 function roomHasRole(roomId: string, role: GameRole) {

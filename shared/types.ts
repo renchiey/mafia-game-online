@@ -48,6 +48,7 @@ export enum GamePhase {
   NIGHT_OUTCOME = "night_outcome",
   DISCUSSION = "discussion_time",
   VOTING = "voting_time",
+  VOTING_OUTCOME = "voting_outcome",
 
   // Game over
   MAFIA_WIN = "mafia_win",
@@ -68,6 +69,7 @@ export interface GameState {
   gamePhase: GamePhase;
   endTurn: number;
   actions: Actions;
+  votes: Record<string, string>;
   veteranShotsRemaining: number;
 }
 
@@ -148,9 +150,10 @@ export interface GameMessageData {
 
 export enum GameMessageType {
   END_TURN = "end-turn",
+  VOTE_LYNCH = "vote-lynch",
 
   // role actions
-  KILL_VOTE = "kill_vote",
+  KILL_VOTE = "kill-vote",
   HEAL = "heal",
   INVESTIGATE = "investigate",
   TRANSPORT = "transport",

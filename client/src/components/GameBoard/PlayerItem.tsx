@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
-import { GameRole, Player, Role } from "../../../../shared/types";
+import { GamePhase, GameRole, Player, Role } from "../../../../shared/types";
 
 interface PlayerProps {
   player: Player;
@@ -10,8 +10,12 @@ interface PlayerProps {
   playersTurn: boolean;
   handlePlayerSelect: (p: Player | undefined) => void;
   selected: boolean;
+  gamePhase: GamePhase;
 }
 
+/**
+ *  TODO: Reduce number of props required to pass into this component
+ */
 export const PlayerItem = ({
   player,
   playerId,
@@ -21,6 +25,7 @@ export const PlayerItem = ({
   playersTurn,
   handlePlayerSelect,
   selected,
+  gamePhase,
 }: PlayerProps) => {
   const [actionButtonText, setactionButtonText] = useState(<></>);
 
@@ -44,6 +49,12 @@ export const PlayerItem = ({
         break;
     }
   }, [currentPlayerRole]);
+
+  useEffect(() => {
+    if (gamePhase === GamePhase.VOTING) {
+      setactionButtonText(<span className="text-black">VOTE</span>);
+    }
+  }, [gamePhase]);
 
   return (
     <div

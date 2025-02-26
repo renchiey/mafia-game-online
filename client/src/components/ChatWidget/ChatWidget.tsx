@@ -12,6 +12,7 @@ export function ChatWidget({ players, playerId }: ChatWidgetProps) {
   const [input, setInput] = useState("");
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [subscribe, unsubscribe, send] = useContext(WebSocketContext);
+  const [isDead, setIsDead] = useState(false);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -23,6 +24,18 @@ export function ChatWidget({ players, playerId }: ChatWidgetProps) {
   }, [messages]);
 
   useEffect(() => {
+    const currentPlayer = players.find((p) => p.clientId === playerId);
+
+    if (!currentPlayer) throw new Error("WTF is going on here.");
+
+    if (currentPlayer.gameData.dead) {
+      setIsDead(true);
+    } else {
+      setIsDead(false);
+    }
+  }, [players]);
+
+  useEffect(() => {
     subscribe(MessageType.CHAT_MESSAGE, (newMessage: ChatMessage) => {
       setMessages([...messages, newMessage]);
     });
@@ -31,7 +44,7 @@ export function ChatWidget({ players, playerId }: ChatWidgetProps) {
   }, [subscribe, unsubscribe]);
 
   const sendMessage = () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isDead) return;
 
     send({ type: MessageType.CHAT_MESSAGE, data: input });
 

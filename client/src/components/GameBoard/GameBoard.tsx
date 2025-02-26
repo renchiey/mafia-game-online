@@ -59,6 +59,9 @@ export const GameBoard = ({
 
     setSelectedPlayer(undefined);
 
+    if ((players.find((p) => p.clientId === playerId) as Player).gameData.dead)
+      return;
+
     setPlayersTurn(false);
 
     switch (gamePhase) {
@@ -74,6 +77,9 @@ export const GameBoard = ({
       case GamePhase.TRANSPORTER_TURN:
         if (role?.name === GameRole.TRANSPORTER) setPlayersTurn(true);
         break;
+      case GamePhase.VOTING:
+        setPlayersTurn(true);
+        break;
       default:
         setPlayersTurn(false);
         break;
@@ -87,10 +93,11 @@ export const GameBoard = ({
     }
 
     if (
-      !playersTurn ||
-      player.clientId === playerId ||
-      (role?.allegiance.name === AllegianceType.MAFIA &&
-        player.gameData.role?.allegiance.name === AllegianceType.MAFIA)
+      (!playersTurn ||
+        player.clientId === playerId ||
+        (role?.allegiance.name === AllegianceType.MAFIA &&
+          player.gameData.role?.allegiance.name === AllegianceType.MAFIA)) &&
+      gamePhase !== GamePhase.VOTING
     )
       return;
 
@@ -132,6 +139,20 @@ export const GameBoard = ({
 
   const performAction = () => {
     if (!selectedPlayer) return;
+
+    if (gamePhase === GamePhase.VOTING) {
+      const vote: GameMessageData = {
+        type: GameMessageType.VOTE_LYNCH,
+        playerSelected: selectedPlayer.clientId,
+      };
+
+      send({
+        type: MessageType.GAME_EVENT,
+        data: vote,
+      });
+
+      return;
+    }
 
     const action: GameMessageData = {
       type: GameMessageType.KILL_VOTE,
@@ -176,6 +197,7 @@ export const GameBoard = ({
             performAction={performAction}
             handlePlayerSelect={(p) => handlePlayerSelect(p)}
             selected={selectedPlayer?.clientId === player.clientId}
+            gamePhase={gamePhase}
           />
         ))}
       </div>

@@ -59,26 +59,45 @@ export const GameBoard = ({
 
     setSelectedPlayer(undefined);
 
-    if ((players.find((p) => p.clientId === playerId) as Player).gameData.dead)
-      return;
-
     setPlayersTurn(false);
+
+    let isDead = false;
+
+    if ((players.find((p) => p.clientId === playerId) as Player).gameData.dead)
+      isDead = true;
 
     switch (gamePhase) {
       case GamePhase.MAFIOSO_TURN:
-        if (role?.name === GameRole.MAFIOSO) setPlayersTurn(true);
+        if (role?.name === GameRole.MAFIOSO && !isDead) setPlayersTurn(true);
         break;
       case GamePhase.DOCTOR_TURN:
-        if (role?.name === GameRole.DOCTOR) setPlayersTurn(true);
+        if (role?.name === GameRole.DOCTOR && !isDead) setPlayersTurn(true);
         break;
       case GamePhase.INVESTIGATOR_TURN:
-        if (role?.name === GameRole.INVESTIGATOR) setPlayersTurn(true);
+        if (role?.name === GameRole.INVESTIGATOR && !isDead)
+          setPlayersTurn(true);
         break;
       case GamePhase.TRANSPORTER_TURN:
-        if (role?.name === GameRole.TRANSPORTER) setPlayersTurn(true);
+        if (role?.name === GameRole.TRANSPORTER && !isDead)
+          setPlayersTurn(true);
         break;
       case GamePhase.VOTING:
-        setPlayersTurn(true);
+        if (!isDead) setPlayersTurn(true);
+        break;
+      case GamePhase.MAFIA_WIN:
+      case GamePhase.TOWNS_WIN:
+      case GamePhase.JESTER_WIN:
+        const revealedPlayers: Revealed[] = [];
+
+        players.forEach((player) => {
+          revealedPlayers.push([
+            player.clientId,
+            getColor(player.gameData.role as Role),
+          ]);
+        });
+
+        setRevealed(revealedPlayers);
+
         break;
       default:
         setPlayersTurn(false);
@@ -91,6 +110,8 @@ export const GameBoard = ({
       setSelectedPlayer(player);
       return;
     }
+
+    if (!playersTurn) return;
 
     if (
       (!playersTurn ||

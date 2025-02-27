@@ -13,6 +13,7 @@ import { Client } from "../types";
 import {
   addRole,
   changeSettings,
+  endGame,
   generateEmptyRoom,
   getRoom,
   handleAction,
@@ -531,6 +532,11 @@ export function handleGameEvent(clientId: string, message: Message) {
         });
       });
 
+      break;
+    case GameMessageType.END_GAME:
+      endGame(roomId);
+
+      broadcastStateToRoom(roomId);
       break;
     default:
       throw new Error(`Should not be here ${gameMessageData}`);

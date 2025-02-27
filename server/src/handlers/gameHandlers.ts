@@ -293,6 +293,7 @@ export function nextPhase(roomId: string): GamePhase {
     case GamePhase.NIGHT_OUTCOME:
     case GamePhase.DISCUSSION:
     case GamePhase.VOTING:
+    case GamePhase.VOTING_OUTCOME:
       phase = transitionPhaseHelper(roomId, 6);
       break;
     default:
@@ -402,13 +403,15 @@ function checkGameOver(roomId: string): GamePhase | null {
       jester_lynched = true;
   });
 
+  console.log(`MAFIA ALIVE: ${mafia_alive}, TOWNS ALIVE: ${towns_alive}`);
+
   if (jester_lynched) {
     room.gameState.gamePhase = GamePhase.JESTER_WIN;
 
     return GamePhase.JESTER_WIN;
   }
 
-  if (towns_alive < mafia_alive) {
+  if (towns_alive <= mafia_alive) {
     room.gameState.gamePhase = GamePhase.MAFIA_WIN;
 
     return GamePhase.MAFIA_WIN;

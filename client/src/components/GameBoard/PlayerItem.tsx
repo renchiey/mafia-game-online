@@ -27,23 +27,23 @@ export const PlayerItem = ({
   selected,
   gamePhase,
 }: PlayerProps) => {
-  const [actionButtonText, setactionButtonText] = useState(<></>);
+  const [actionButtonText, setActionButtonText] = useState(<></>);
 
   useEffect(() => {
     if (!currentPlayerRole) return;
 
     switch (currentPlayerRole.name) {
       case GameRole.MAFIOSO:
-        setactionButtonText(<span className="text-red-700">VOTE KILL</span>);
+        setActionButtonText(<span className="text-red-700">VOTE KILL</span>);
         return;
       case GameRole.DOCTOR:
-        setactionButtonText(<span className="text-green-700">HEAL</span>);
+        setActionButtonText(<span className="text-green-700">HEAL</span>);
         return;
       case GameRole.INVESTIGATOR:
-        setactionButtonText(<span className="text-blue-950">INVESTIGATE</span>);
+        setActionButtonText(<span className="text-blue-950">INVESTIGATE</span>);
         return;
       case GameRole.TRANSPORTER:
-        setactionButtonText(<span className="text-black">SELECT</span>);
+        setActionButtonText(<span className="text-black">SELECT</span>);
         return;
       default:
         break;
@@ -52,7 +52,7 @@ export const PlayerItem = ({
 
   useEffect(() => {
     if (gamePhase === GamePhase.VOTING) {
-      setactionButtonText(<span className="text-black">VOTE</span>);
+      setActionButtonText(<span className="text-black">VOTE</span>);
     }
   }, [gamePhase]);
 

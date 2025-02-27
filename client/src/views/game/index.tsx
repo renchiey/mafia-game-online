@@ -14,6 +14,7 @@ import { Lobby } from "../lobby";
 import { ChatWidget } from "../../components/ChatWidget/ChatWidget";
 import { GameBoard } from "../../components/GameBoard/GameBoard";
 import { loadAudioFiles } from "../../utils/helper";
+import { Button } from "../../components/Button";
 
 export function Game() {
   const [subscribe, unsubscribe, send, connected] =
@@ -96,7 +97,9 @@ export function Game() {
   }, [subscribe, unsubscribe]);
 
   useEffect(() => {
+    console.log(gamePhase);
     if (inGame && gamePhase === GamePhase.BEGINNING) {
+      setGameOver(false);
       goNextPhase();
       return;
     }
@@ -109,7 +112,7 @@ export function Game() {
       gamePhase === GamePhase.TRANSPORTER_TURN
     )
       setTimer(15);
-    else if (gamePhase === GamePhase.DISCUSSION) setTimer(60);
+    else if (gamePhase === GamePhase.DISCUSSION) setTimer(30);
 
     if (!audioMap) {
       handleError();
@@ -172,6 +175,11 @@ export function Game() {
       case GamePhase.VOTING_OUTCOME:
         setTimeout(() => goNextPhase(), 3500);
         break;
+      case GamePhase.MAFIA_WIN:
+      case GamePhase.TOWNS_WIN:
+      case GamePhase.JESTER_WIN:
+        setGameOver(true);
+        break;
       default:
         goNextPhase();
     }
@@ -200,7 +208,7 @@ export function Game() {
       goNextPhase();
 
       setDiscussionStarted(false);
-    }, 60000);
+    }, 30000);
   };
 
   const startVoting = () => {
@@ -219,6 +227,15 @@ export function Game() {
       type: MessageType.GAME_EVENT,
       data: {
         type: GameMessageType.END_TURN,
+      },
+    });
+  };
+
+  const handleBackToLobby = () => {
+    send({
+      type: MessageType.GAME_EVENT,
+      data: {
+        type: GameMessageType.END_GAME,
       },
     });
   };
@@ -243,13 +260,21 @@ export function Game() {
         return "DISCUSSION TIME";
       case GamePhase.VOTING:
         return "VOTING TIME";
+      case GamePhase.VOTING_OUTCOME:
+        return "VOTING OUTCOME";
+      case GamePhase.MAFIA_WIN:
+        return "MAFIA WIN";
+      case GamePhase.TOWNS_WIN:
+        return "TOWNS WIN";
+      case GamePhase.JESTER_WIN:
+        return "JESTER WINS";
       default:
-        return "GAME OVER";
+        throw new Error(`${phase} does not have a display.`);
     }
   };
 
   return inGame && gamePhase ? (
-    <>
+    <div className="flex flex-col mt-20">
       <div className="w-full py-5 flex flex-col justify-center items-center">
         <h2>{gamePhase && formatGamePhaseDisplay(gamePhase)}</h2>
         <h2>TIME REMAINING: {timer}</h2>
@@ -263,7 +288,14 @@ export function Game() {
         />
         <ChatWidget players={players} playerId={playerId} />
       </div>
-    </>
+      <div className="flex justify-center my-10">
+        {gameOver ? (
+          <Button onClick={handleBackToLobby}>Back to lobby</Button>
+        ) : (
+          <Button>Skip Phase</Button>
+        )}
+      </div>
+    </div>
   ) : (
     <Lobby
       players={players}

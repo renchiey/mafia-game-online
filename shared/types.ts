@@ -168,6 +168,7 @@ export enum GameMessageType {
   MAFIA_WIN = "mafia-win",
   TOWNS_WIN = "towns-win",
   JESTER_WIN = "jester-win",
+  END_GAME = "end-game",
 }
 
 export enum GameRole {

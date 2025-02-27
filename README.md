@@ -19,3 +19,7 @@
 - WebSockets
 
 
+### For future implementation
+[] Refactor game related components (some currently require too many props to be passed down)
+[] AI generated night outcome message
+[] Refactor player storage on server-side 

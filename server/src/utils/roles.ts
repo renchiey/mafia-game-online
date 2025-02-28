@@ -58,13 +58,6 @@ export const ROLES: Role[] = [
     description: "Heal one person each night, preventing them from dying.",
   },
   {
-    name: GameRole.VETERAN,
-    iconSrc: VeteranIcon,
-    allegiance: TOWNS,
-    description:
-      "Decide if you will go on alert on a certain night and kill anyone who visits you.",
-  },
-  {
     name: GameRole.TRANSPORTER,
     iconSrc: TransportIcon,
     allegiance: TOWNS,
@@ -77,3 +70,12 @@ export const ROLES: Role[] = [
     description: "Trick the Town into voting against you.",
   },
 ];
+
+// NOT YET IMPLEMENTED
+// {
+//   name: GameRole.VETERAN,
+//   iconSrc: VeteranIcon,
+//   allegiance: TOWNS,
+//   description:
+//     "Decide if you will go on alert on a certain night and kill anyone who visits you.",
+// },

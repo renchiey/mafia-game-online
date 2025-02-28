@@ -12,7 +12,6 @@ import {
   Room,
   Settings,
   SettingsOptions,
-  Tuple,
 } from "../../../shared/types";
 import { MessageType } from "../../../shared/types";
 import { getClientRoomId, removeClientFromRoom } from "./socketHandlers";
@@ -25,14 +24,6 @@ export const settingOptions: SettingsOptions = {
 };
 
 const MIN_PLAYERS = 4;
-
-const DISCUSSION_TIMEOUT = 60000; // 1 minute
-
-const VOTING_TIMEOUT = 10000; // 10 seconds
-
-const TURN_TIMEOUT = 15000; // 15 seconds
-
-const STAGGER_TIMEOUT = 1000; // 1 second
 
 export function setName(clientId: string, data: Message) {
   // processing name
@@ -403,8 +394,6 @@ function checkGameOver(roomId: string): GamePhase | null {
     )
       jester_lynched = true;
   });
-
-  console.log(`MAFIA ALIVE: ${mafia_alive}, TOWNS ALIVE: ${towns_alive}`);
 
   if (jester_lynched) {
     room.gameState.gamePhase = GamePhase.JESTER_WIN;

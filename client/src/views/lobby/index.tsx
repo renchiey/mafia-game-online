@@ -107,15 +107,10 @@ export function Lobby({
         className="mt-5"
       />
 
-      <div className="flex mt-10 flex-col">
+      <div className="flex mt-10 mb-5 flex-col">
         <Button
           onClick={() => handleStartGame()}
-          className={
-            " py-2 px-4 border-2 rounded-xl mb-5" +
-            (playerId === hostId
-              ? " border-white hover:bg-red-800 active:bg-red-800 cursor-pointer "
-              : " border-gray-400 text-gray-400 cursor-not-allowed")
-          }
+          disabled={playerId !== hostId}
         >
           Start Game
         </Button>

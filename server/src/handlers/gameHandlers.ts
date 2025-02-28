@@ -82,12 +82,13 @@ export function generateEmptyRoom(host: Player) {
       neutrals: [],
       actions: {},
       votes: {},
-      endTurn: 0,
+      endTurn: new Set(),
       veteranShotsRemaining: 3,
     },
     settings: {
       maxPlayers: 10, // Default max players
-      roundSpeed: 1, // default round speed (multiplier value)
+      turnSpeed: 1, // default round speed (multiplier value)
+      discussionDuration: 30, // Default discussion duration
       revealRoleAfterDeath: false,
       narrator: true,
       veteranShots: 3,
@@ -212,7 +213,7 @@ export function startGame(roomId: string): MessageType {
     towns: [],
     neutrals: [],
     actions: {},
-    endTurn: 0,
+    endTurn: new Set(),
     votes: {},
     veteranShotsRemaining: 3,
   };
@@ -710,6 +711,10 @@ export function processVotingOutcome(roomId: string) {
       else if (tally[highest] < count) highest = pId;
       else if (tally[highest] === count) tiedPlayer = pId;
     }
+  }
+
+  if (highest === null) {
+    return "No one was voted off today.";
   }
 
   if (tiedPlayer && highest && tally[tiedPlayer] === tally[highest]) {

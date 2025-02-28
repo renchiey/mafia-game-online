@@ -9,6 +9,7 @@ import {
   MessageType,
   Player,
   Role,
+  Settings,
 } from "../../../../shared/types";
 import { PlayerItem } from "./PlayerItem";
 
@@ -17,6 +18,7 @@ interface GameBoardProps {
   playerId: string;
   gamePhase: GamePhase;
   send: (data: Message) => void;
+  settings: Settings;
 }
 
 type Revealed = [string, string]; // [clientId, color]
@@ -26,12 +28,14 @@ export const GameBoard = ({
   playerId,
   gamePhase,
   send,
+  settings,
 }: GameBoardProps) => {
   const [role, setRole] = useState<Role>();
 
   const [revealed, setRevealed] = useState<Revealed[]>([]);
   const [playersTurn, setPlayersTurn] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player>();
+  const [revealRoleOnDeath, setRevealRoleOnDeath] = useState(false);
 
   useEffect(() => {
     const player = players.find((p) => p.clientId === playerId) as Player;
@@ -52,6 +56,8 @@ export const GameBoard = ({
       });
     }
     setRevealed(tempRevealed);
+
+    if (settings.revealRoleAfterDeath) setRevealRoleOnDeath(true);
   }, []);
 
   useEffect(() => {
@@ -139,6 +145,18 @@ export const GameBoard = ({
   };
 
   const displayRole = (player: Player) => {
+    if (player.gameData.dead && revealRoleOnDeath) {
+      return (
+        <p>
+          {"<"}
+          <span className={getColor(player.gameData.role as Role)}>
+            {player.gameData.role?.name}
+          </span>
+          {">"}
+        </p>
+      );
+    }
+
     let color = "";
     const p = revealed.find((p) => {
       if (p[0] === player.clientId) {

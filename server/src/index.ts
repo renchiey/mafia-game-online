@@ -83,7 +83,6 @@ wss.on("connection", (ws) => {
           handleStartGame(clientId);
           break;
         case MessageType.GAME_EVENT:
-          console.log(`[GAME EVENT] ${msg.data}`);
           handleGameEvent(clientId, msg);
           break;
         case MessageType.CHAT_MESSAGE:

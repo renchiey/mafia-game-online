@@ -357,8 +357,6 @@ function broadcastStateToRoom(roomId: string) {
 }
 
 export function handleChangeSettings(clientId: string, msg: Message) {
-  if (!instanceOfSettings(msg.data)) throw new Error("Invalid message.");
-
   const roomId = clients.get(clientId)?.roomId;
 
   if (!roomId) throw new Error("Client not in room.");
@@ -468,18 +466,35 @@ export function handleGameEvent(clientId: string, message: Message) {
   const room = getRoom(roomId) as Room;
 
   switch (gameMessageData.type) {
+    case GameMessageType.SKIP_PHASE:
     case GameMessageType.END_TURN:
-      room.gameState.endTurn += 1;
+      if (!room.gameState.endTurn.has(clientId)) {
+        room.gameState.endTurn.add(clientId);
 
-      if (room.gameState.endTurn >= room.players.length) {
-        room.gameState.endTurn = 0;
-        const p = nextPhase(roomId);
+        if (gameMessageData.type === GameMessageType.SKIP_PHASE) {
+          const username = room.players.find((p) => p.clientId === clientId)
+            ?.username as string;
 
-        console.log(`[GAME EVENT] Going to next phase ${p}`);
+          broadcastToRoom(roomId, {
+            type: MessageType.CHAT_MESSAGE,
+            data: {
+              id: Date.now(),
+              sender: "server",
+              text: `${username} has voted to skip the phase.`,
+            },
+          });
+        }
+      }
+
+      if (room.gameState.endTurn.size >= room.players.length) {
+        room.gameState.endTurn = new Set();
+        const next = nextPhase(roomId);
+
+        console.log(`[GAME EVENT] Going to next phase ${next}`);
 
         setTimeout(() => broadcastStateToRoom(roomId), 1500);
 
-        if (p === GamePhase.VOTING_OUTCOME) {
+        if (next === GamePhase.VOTING_OUTCOME) {
           const text = processVotingOutcome(roomId);
 
           broadcastToRoom(roomId, {
@@ -492,7 +507,7 @@ export function handleGameEvent(clientId: string, message: Message) {
           });
         }
 
-        if (p === GamePhase.NIGHT_OUTCOME) {
+        if (next === GamePhase.NIGHT_OUTCOME) {
           const texts = processNightOutcome(roomId);
 
           texts.forEach((text) => {
@@ -504,6 +519,17 @@ export function handleGameEvent(clientId: string, message: Message) {
                 text: text,
               },
             });
+          });
+        }
+
+        if (next === GamePhase.NIGHT) {
+          broadcastToRoom(roomId, {
+            type: MessageType.CHAT_MESSAGE,
+            data: {
+              id: Date.now(),
+              sender: "server",
+              text: `Night ${room.gameState.round}`,
+            },
           });
         }
       }

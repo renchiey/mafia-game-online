@@ -23,8 +23,11 @@ const SettingsWidget = ({
   const [maxPlayersOpts, setMaxPlayersOpts] = useState<number[]>([]);
   const [maxPlayers, setMaxPlayers] = useState<number>(settings.maxPlayers);
   const [speedOpts, setSpeedOpts] = useState<number[]>([]);
-  const [speed, setSpeed] = useState<number>(settings.roundSpeed);
-  const [revealRole, setRevealRole] = useState(false);
+  const [turnSpeed, setTurnSpeed] = useState<number>(settings.turnSpeed);
+  const [discussionDuration, setDiscussionDuration] = useState<number>(
+    settings.discussionDuration
+  );
+  const [revealRoleAfterDeath, setRevealRoleAfterDeath] = useState(false);
   const [narrator, setNarrator] = useState(false);
   const [veteranShots, setVeteranShots] = useState<number>(
     settings.veteranShots
@@ -45,6 +48,10 @@ const SettingsWidget = ({
   }, [settings]);
 
   useEffect(() => {
+    console.log(discussionDuration);
+  }, [discussionDuration]);
+
+  useEffect(() => {
     const channel = MessageType.SETTING_OPTS;
     subscribe(channel, (opts: SettingsOptions) => {
       setMaxPlayersOpts(opts.maxPlayers);
@@ -54,17 +61,19 @@ const SettingsWidget = ({
 
   const resetSettings = () => {
     setMaxPlayers(settings.maxPlayers);
-    setSpeed(settings.roundSpeed);
-    setRevealRole(settings.revealRoleAfterDeath);
+    setTurnSpeed(settings.turnSpeed);
+    setRevealRoleAfterDeath(settings.revealRoleAfterDeath);
     setNarrator(settings.narrator);
+    setDiscussionDuration(settings.discussionDuration);
     setSettingsChanged(false);
   };
 
   const handleSave = () => {
     const settings: Settings = {
       maxPlayers,
-      roundSpeed: speed,
-      revealRoleAfterDeath: revealRole,
+      turnSpeed,
+      revealRoleAfterDeath,
+      discussionDuration,
       narrator,
       veteranShots,
     };
@@ -92,6 +101,14 @@ const SettingsWidget = ({
         data: settings,
       });
     }
+  };
+
+  const handleDiscussionDurationChange = (value: number) => {
+    if (value > 500) setDiscussionDuration(500);
+    else if (value < 30) setDiscussionDuration(30);
+    else setDiscussionDuration(value);
+
+    setSettingsChanged(true);
   };
 
   return (
@@ -130,11 +147,13 @@ const SettingsWidget = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Round Speed</label>
+          <label className="block text-sm font-medium mb-1">
+            Turn Duration
+          </label>
           <select
-            value={speed}
+            value={turnSpeed}
             onChange={(e) => {
-              setSpeed(Number(e.target.value));
+              setTurnSpeed(Number(e.target.value));
               setSettingsChanged(true);
             }}
             className="w-full p-2 border rounded-lg"
@@ -142,22 +161,39 @@ const SettingsWidget = ({
             {speedOpts.length > 0 ? (
               speedOpts.map((speed) => (
                 <option key={speed} value={speed} className=" text-black">
-                  {speed}
+                  {`${Math.floor(20 * (1 / speed))} seconds`}
                 </option>
               ))
             ) : (
-              <option value={speed}>{speed}</option>
+              <option value={turnSpeed}>{turnSpeed}</option>
             )}
           </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Discussion Duration (seconds)
+          </label>
+          <input
+            type="number"
+            min={30}
+            placeholder="In seconds"
+            max={1000}
+            value={discussionDuration}
+            onChange={(e) =>
+              handleDiscussionDurationChange(Number(e.target.value))
+            }
+            className=" border-white border p-2 rounded-lg w-full"
+          />
         </div>
 
         <div className="flex items-center justify-between">
           <label className="text-sm font-medium">Reveal Role After Death</label>
           <input
             type="checkbox"
-            checked={revealRole}
+            checked={revealRoleAfterDeath}
             onChange={() => {
-              setRevealRole(!revealRole);
+              setRevealRoleAfterDeath(!revealRoleAfterDeath);
               setSettingsChanged(true);
             }}
             className="w-5 h-5"

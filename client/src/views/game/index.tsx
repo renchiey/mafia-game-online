@@ -103,7 +103,7 @@ export function Game() {
       goNextPhase();
       return;
     }
-    if (!inGame || !gamePhase) return;
+    if (!inGame || !gamePhase || !settings) return;
 
     if (
       gamePhase === GamePhase.MAFIOSO_TURN ||
@@ -111,8 +111,9 @@ export function Game() {
       gamePhase === GamePhase.INVESTIGATOR_TURN ||
       gamePhase === GamePhase.TRANSPORTER_TURN
     )
-      setTimer(15);
-    else if (gamePhase === GamePhase.DISCUSSION) setTimer(30);
+      setTimer(Math.floor(20 * (1 / (settings?.turnSpeed as number))));
+    else if (gamePhase === GamePhase.DISCUSSION)
+      setTimer(settings?.discussionDuration as number);
 
     if (!audioMap) {
       handleError();
@@ -133,6 +134,7 @@ export function Game() {
 
     return () => {
       if (audioRef.current) {
+        audioRef.current.pause();
         audio.removeEventListener("ended", handleEnded);
         audioRef.current.removeEventListener("ended", goNextPhase);
       }
@@ -198,7 +200,7 @@ export function Game() {
       audio.play();
 
       setTurnStarted(false);
-    }, 15000);
+    }, Math.floor(20 * (1 / (settings?.turnSpeed as number))) * 1000);
   };
 
   const startDiscussion = () => {
@@ -208,7 +210,7 @@ export function Game() {
       goNextPhase();
 
       setDiscussionStarted(false);
-    }, 30000);
+    }, (settings?.discussionDuration as number) * 1000);
   };
 
   const startVoting = () => {
@@ -227,6 +229,15 @@ export function Game() {
       type: MessageType.GAME_EVENT,
       data: {
         type: GameMessageType.END_TURN,
+      },
+    });
+  };
+
+  const skipPhase = () => {
+    send({
+      type: MessageType.GAME_EVENT,
+      data: {
+        type: GameMessageType.SKIP_PHASE,
       },
     });
   };
@@ -273,7 +284,7 @@ export function Game() {
     }
   };
 
-  return inGame && gamePhase ? (
+  return inGame && gamePhase && settings ? (
     <div className="flex flex-col mt-20">
       <div className="w-full py-5 flex flex-col justify-center items-center">
         <h2>{gamePhase && formatGamePhaseDisplay(gamePhase)}</h2>
@@ -285,6 +296,7 @@ export function Game() {
           playerId={playerId}
           gamePhase={gamePhase}
           send={send}
+          settings={settings}
         />
         <ChatWidget players={players} playerId={playerId} />
       </div>
@@ -292,7 +304,12 @@ export function Game() {
         {gameOver ? (
           <Button onClick={handleBackToLobby}>Back to lobby</Button>
         ) : (
-          <Button>Skip Phase</Button>
+          <Button
+            disabled={gamePhase && gamePhase !== GamePhase.DISCUSSION}
+            onClick={skipPhase}
+          >
+            Skip Phase
+          </Button>
         )}
       </div>
     </div>

@@ -27,7 +27,8 @@ export interface Player {
 
 export interface Settings {
   maxPlayers: number;
-  roundSpeed: number;
+  turnSpeed: number;
+  discussionDuration: number;
   revealRoleAfterDeath: boolean;
   narrator: boolean;
   veteranShots: number;
@@ -67,7 +68,7 @@ export interface GameState {
   towns: Player[];
   neutrals: Player[];
   gamePhase: GamePhase;
-  endTurn: number;
+  endTurn: Set<string>;
   actions: Actions;
   votes: Record<string, string>;
   veteranShotsRemaining: number;
@@ -151,6 +152,7 @@ export interface GameMessageData {
 export enum GameMessageType {
   END_TURN = "end-turn",
   VOTE_LYNCH = "vote-lynch",
+  SKIP_PHASE = "skip-phase",
 
   // role actions
   KILL_VOTE = "kill-vote",

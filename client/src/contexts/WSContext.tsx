@@ -11,7 +11,8 @@ interface WebSocketProviderProps {
 }
 
 export function WebSocketProvider({ children }: WebSocketProviderProps) {
-  const WS_URL = "ws://192.168.1.81:8080";
+  const WS_URL = import.meta.env.VITE_WS_URL;
+  console.log(WS_URL);
   const channels = useRef<ChannelInterface>({});
   const [connected, setConnected] = useState(false);
 

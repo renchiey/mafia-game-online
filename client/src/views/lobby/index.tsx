@@ -31,6 +31,8 @@ export function Lobby({
   const [showKickedModal, setShowKickedModal] = useState(false);
   const copyTimeoutRef = useRef<number | null>(null);
 
+  const url = import.meta.env.VITE_URL;
+
   useEffect(() => {
     if (playerId && hostId && playerId === hostId)
       send({ type: MessageType.GET_ROLES });
@@ -59,7 +61,7 @@ export function Lobby({
     setCopyFeedback("Invite link copied!");
 
     navigator.clipboard
-      .writeText(`${import.meta.env.VITE_URL}?${roomId}`)
+      .writeText(`${url}?${roomId}`)
       .then(() => setCopyFeedback("Invite link copied!"))
       .catch(() => setCopyFeedback("Failed to copy link."));
 
@@ -72,7 +74,7 @@ export function Lobby({
   };
 
   const handleCloseModal = () => {
-    window.location.href = import.meta.env.BASE_URL;
+    window.location.href = url;
   };
 
   const handleStartGame = () => {

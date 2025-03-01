@@ -1,0 +1,8 @@
+services:
+  mafia-client:
+    build:
+      context: .
+      target: production
+
+    ports:
+      - 3000:3000

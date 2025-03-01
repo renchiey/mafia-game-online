@@ -59,7 +59,7 @@ export function Lobby({
     setCopyFeedback("Invite link copied!");
 
     navigator.clipboard
-      .writeText(`${import.meta.env.VITE_DEV_URL}?${roomId}`)
+      .writeText(`${import.meta.env.VITE_URL}?${roomId}`)
       .then(() => setCopyFeedback("Invite link copied!"))
       .catch(() => setCopyFeedback("Failed to copy link."));
 

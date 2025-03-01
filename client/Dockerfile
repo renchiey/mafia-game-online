@@ -8,6 +8,10 @@ RUN npm install
 
 COPY . . 
 
+ENV VITE_URL=http://localhost:3000/
+
+ENV VITE_WS_URL=ws://localhost:8080/
+
 RUN npm run build
 
 FROM node:22-alpine as production

@@ -18,6 +18,8 @@
 - TypeScript
 - WebSockets
 
+## Running with Docker
+###
 
 ### To implement
 - [Not started] Refactor game related components (some currently require too many props to be passed down)

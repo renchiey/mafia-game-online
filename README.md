@@ -4,9 +4,12 @@
 
 ## How to play
 1. To start playing, hit create play or join game. (To join a game you must receive an invite link from somemone already in a room)
-![landing page](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/landing-page.png "landing page")
 
-2. After hitting one of the two buttons you'll end up in a lobby!
+| landing |
+| --- |
+| ![landing page](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/landing-page.png "landing page") |
+
+3. After hitting one of the two buttons you'll end up in a lobby!
 
 | lobby |
 | --- |
@@ -17,6 +20,12 @@
 | settings | adding roles |
 | --- | --- |
 | ![settings](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/settings.png "settings") | ![adding roles](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/adding-roles.png "adding roles ") |
+
+5. After following the steps above, you can start playing a game
+
+| game |
+| --- |
+| ![game](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/play-game.png "game") |
 
 ## Technologies/libraries used
 ### Client Side

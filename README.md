@@ -3,7 +3,8 @@
 > Web version of the Mafia card game. Eliminates the need for a game master.
 
 ## How to play
-
+1. To start playing, hit create play or join game. (To join a game you must receive an invite link from somemone already in a room)
+![alt text](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/landing-page.png "landing page")
 
 ## Technologies/libraries used
 ### Client Side

@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 interface ButtonProps {
   children?: string;
   onClick?: () => void;
@@ -13,10 +11,6 @@ export const Button = ({
   className,
   disabled,
 }: ButtonProps) => {
-  const [btnDisabled, setBtnIsDisabled] = useState(
-    disabled === undefined ? true : disabled
-  );
-
   return (
     <button
       className={

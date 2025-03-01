@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
-import { GamePhase, GameRole, Player, Role } from "../../../../shared/types";
+import { GamePhase, GameRole, Player, Role } from "../../../shared/types";
 
 interface PlayerProps {
   player: Player;

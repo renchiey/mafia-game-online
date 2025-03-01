@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { WebSocketContext } from "../../contexts/WSContext";
-import { ChatMessage, MessageType, Player } from "../../../../shared/types";
+import { ChatMessage, MessageType, Player } from "../../../shared/types";
 
 interface ChatWidgetProps {
   players: Player[];

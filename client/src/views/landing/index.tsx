@@ -1,8 +1,8 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { TextInput } from "../../components/TextInput";
 import { Button } from "../../components/Button";
 import { WebSocketContext } from "../../contexts/WSContext";
-import { MessageType } from "../../../../shared/types";
+import { MessageType } from "../../../shared/types";
 import { changeURL } from "../../utils/helper";
 import { PopupMessage } from "../../components/PopupMessage";
 import { Modal } from "../../components/Modal";

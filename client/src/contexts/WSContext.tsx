@@ -1,7 +1,7 @@
 import { useEffect, createContext, ReactNode, useRef, useState } from "react";
 import useWebSocket from "react-use-websocket";
 import { instanceOfMessage } from "../utils/helper";
-import { Message } from "../../../shared/types";
+import { Message } from "../../shared/types";
 import { ChannelInterface } from "../types";
 
 export const WebSocketContext = createContext<any>(null);

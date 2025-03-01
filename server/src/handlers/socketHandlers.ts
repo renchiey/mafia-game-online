@@ -8,7 +8,7 @@ import {
   GameMessageType,
   GameMessageData,
   ChatMessage,
-} from "../../../shared/types";
+} from "../shared/types";
 import { Client } from "../types";
 import {
   addRole,
@@ -28,7 +28,7 @@ import {
   startGame,
 } from "./gameHandlers";
 import { ROLES } from "../utils/roles";
-import { instanceOfRole, instanceOfSettings } from "../utils/typeCheck";
+import { instanceOfRole } from "../utils/typeCheck";
 import { removeItem } from "../utils/helper";
 
 const clients = new Map<string, Client>();

@@ -1,4 +1,4 @@
-import { GameMessageData, Role, Settings } from "../../../shared/types";
+import { Role, Settings } from "../shared/types";
 
 export function instanceOfRole(object: any): object is Role {
   return (

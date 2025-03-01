@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Button } from "../../components/Button";
-import { MessageType, Player, Role, Settings } from "../../../../shared/types";
+import { MessageType, Player, Role, Settings } from "../../../shared/types";
 import { WebSocketContext } from "../../contexts/WSContext";
 import { PlayerList } from "../../components/PlayersList/PlayerList";
 import { RoleList } from "../../components/RolesList/RoleList";

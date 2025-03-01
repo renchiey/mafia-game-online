@@ -1,7 +1,7 @@
 import express from "express";
 import { WebSocketServer } from "ws";
 import { v4 as uuidv4 } from "uuid";
-import { Message, MessageType } from "../../shared/types";
+import { Message, MessageType } from "./shared/types";
 import {
   handleAddRole,
   handleChangeSettings,

@@ -12,8 +12,8 @@ import {
   Room,
   Settings,
   SettingsOptions,
-} from "../../../shared/types";
-import { MessageType } from "../../../shared/types";
+  MessageType,
+} from "../shared/types";
 import { getClientRoomId, removeClientFromRoom } from "./socketHandlers";
 
 const rooms = new Map<string, Room>();

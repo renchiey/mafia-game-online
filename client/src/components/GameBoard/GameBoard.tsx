@@ -10,7 +10,7 @@ import {
   Player,
   Role,
   Settings,
-} from "../../../../shared/types";
+} from "../../../shared/types";
 import { PlayerItem } from "./PlayerItem";
 
 interface GameBoardProps {

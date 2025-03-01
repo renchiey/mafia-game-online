@@ -2,14 +2,13 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { WebSocketContext } from "../../contexts/WSContext";
 import {
   GameMessageType,
-  GameMessageData,
   GamePhase,
   MessageType,
   Player,
   Role,
   Room,
   Settings,
-} from "../../../../shared/types";
+} from "../../../shared/types";
 import { Lobby } from "../lobby";
 import { ChatWidget } from "../../components/ChatWidget/ChatWidget";
 import { GameBoard } from "../../components/GameBoard/GameBoard";

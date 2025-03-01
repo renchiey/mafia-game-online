@@ -1,9 +1,4 @@
-import {
-  Allegiance,
-  AllegianceType,
-  GameRole,
-  Role,
-} from "../../../shared/types";
+import { Allegiance, AllegianceType, GameRole, Role } from "../shared/types";
 
 import {
   DoctorIcon,
@@ -14,7 +9,7 @@ import {
   TransportIcon,
   VeteranIcon,
 } from "./icons";
-import c from "../../../shared/colors";
+import c from "../shared/colors";
 
 export const TOWNS: Allegiance = {
   name: AllegianceType.TOWN,

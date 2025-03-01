@@ -1,9 +1,5 @@
 import { ReactNode, useContext, useEffect, useRef, useState } from "react";
-import {
-  MessageType,
-  Settings,
-  SettingsOptions,
-} from "../../../../shared/types";
+import { MessageType, Settings, SettingsOptions } from "../../../shared/types";
 import { WebSocketContext } from "../../contexts/WSContext";
 import { PopupMessage } from "../PopupMessage";
 

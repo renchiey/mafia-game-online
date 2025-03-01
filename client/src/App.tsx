@@ -1,7 +1,7 @@
 import { Landing } from "./views/landing";
 import { Game } from "./views/game";
 import { ReactNode, useContext, useEffect, useState } from "react";
-import { MessageType } from "../../shared/types";
+import { MessageType } from "../shared/types";
 import { WebSocketContext } from "./contexts/WSContext";
 
 function App() {

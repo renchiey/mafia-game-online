@@ -10,7 +10,9 @@
 ![lobby page](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/lobby.png "lobby page")
 
 3. As a room host, you can change the settings of the game to your desire and add roles
-![settings](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/settings.png "settings") ![adding roles](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/adding-roles.png "adding roles ")
+settings | adding roles
+--- | ---
+![settings](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/settings.png "settings") | ![adding roles](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/adding-roles.png "adding roles ")
 
 ## Technologies/libraries used
 ### Client Side

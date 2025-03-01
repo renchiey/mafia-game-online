@@ -7,9 +7,12 @@
 ![landing page](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/landing-page.png "landing page")
 
 2. After hitting one of the two buttons you'll end up in a lobby!
-![lobby page](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/lobby.png "lobby page")
 
-3. As a room host, you can change the settings of the game to your desire and add roles
+| lobby |
+| --- |
+| ![lobby page](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/lobby.png "lobby page") |
+
+4. As a room host, you can change the settings of the game to your desire and add roles (remember to hit save when changing settings!)
 
 | settings | adding roles |
 | --- | --- |

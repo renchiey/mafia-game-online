@@ -41,7 +41,7 @@
 - NodeJS
 - Express
 - TypeScript
-- WebSockets
+- ws/websockets
 
 ## Self Hosting
 If you wish to self host you can build your own Docker image for the client webserver and websocket server using the Dockerfiles in the respective directories.

@@ -46,7 +46,7 @@
 ## Self Hosting
 If you wish to self host you can build your own Docker image for the client webserver and websocket server using the Dockerfiles in the respective directories.
 You can also use the prebuilt images linked to this repository.
-> Note: For the client webserver, you cannot change the environment variables as they are set during build time. This means that the default URL and Websocket URL used for sending invite links and connecting to the Websocket server will be localhost:3000 and ws://localhost:8080, respectively, on the client side.
+> Note: For the client webserver image, you cannot change the environment variables as they are set during build time. This means that the default URL and Websocket URL used for sending invite links and connecting to the Websocket server will be localhost:3000 and ws://localhost:8080, respectively, on the client side.
 
 To run the client webserver image:
 1. pull the docker image

@@ -44,11 +44,11 @@
 - ws/websockets
 
 ## Self Hosting
-If you wish to self host you can build your own Docker image for the client webserver and websocket server using the Dockerfiles in the respective directories.
+If you wish to self host you can build your own Docker image for the client web server and websocket server using the Dockerfiles in the respective directories.
 You can also use the prebuilt images linked to this repository.
-> Note: For the client webserver image, you cannot change the environment variables as they are set during build time. This means that the default URL and Websocket URL used for sending invite links and connecting to the Websocket server will be localhost:3000 and ws://localhost:8080, respectively, on the client side.
+> Note: For the client web server image, you cannot change the environment variables as they are set during build time. This means that the default URL and Websocket URL used for sending invite links and connecting to the Websocket server will be localhost:3000 and ws://localhost:8080, respectively, on the client side.
 
-To run the client webserver image:
+To run the client web server image:
 1. pull the docker image
 2. Run the command `docker run -p [PORT YOU WANT TO USE]:3000 mafia-client`
 

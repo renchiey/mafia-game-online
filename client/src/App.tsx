@@ -34,7 +34,7 @@ function App() {
           className="text-4xl font-semibold cursor-pointer"
           onClick={() => (window.location.href = import.meta.env.BASE_URL)}
         >
-          Mafia IRL Online
+          Mafia Card Game
         </div>
       </div>
       {view}

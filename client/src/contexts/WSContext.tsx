@@ -14,7 +14,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
   const WS_URL = import.meta.env.VITE_WS_URL;
   console.log(WS_URL);
   const channels = useRef<ChannelInterface>({});
-  const [connected, setConnected] = useState(false);
+  const [connected, setConnected] = useState(true);
 
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(WS_URL, {
     onOpen: () => {

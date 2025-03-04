@@ -6,6 +6,7 @@ import { MessageType } from "../../../shared/types";
 import { changeURL } from "../../utils/helper";
 import { PopupMessage } from "../../components/PopupMessage";
 import { Modal } from "../../components/Modal";
+import { FaGithub } from "react-icons/fa";
 
 interface LandingProps {
   roomId?: string;
@@ -117,16 +118,49 @@ export function Landing({ roomId }: LandingProps) {
   };
 
   return (
-    <div className=" flex flex-col justify-center items-center h-full ">
-      <TextInput setUsername={setUsername} />
-      <div className="p-4">
-        <Button onClick={handleJoinGame}>Join Game</Button>
+    <>
+      <div className=" flex flex-col justify-center items-center h-full ">
+        <TextInput setUsername={setUsername} />
+        <div className="p-4">
+          <Button onClick={handleJoinGame}>Join Game</Button>
+        </div>
+        <div className="p-4">
+          <Button onClick={handleCreateGame}>Create Game</Button>
+        </div>
+        <div className=" h-[16px] text-red-500">{errorMessage}</div>
       </div>
-      <div className="p-4">
-        <Button onClick={handleCreateGame}>Create Game</Button>
+      <div className="w-full flex justify-center mb-20 flex-wrap ">
+        <div className=" w-[80%] max-w-[420px] bg-blue-900 p-4 rounded-2xl shadow-2xl">
+          <h3 className=" text-xl font-bold text-center mb-5">About</h3>
+          <div className=" flex flex-col gap-5">
+            <p>
+              Mafia Card Game is a free multiplayer web implementation of the
+              popular Mafia card game.
+            </p>
+            <p>
+              A game consists of a{" "}
+              <span className="font-semibold">Night phase</span> - where players
+              with special roles can execute their abilities, a{" "}
+              <span className="font-semibold">Discussion phase</span> - where
+              players come together to discuss the events of the night, and a{" "}
+              <span className="font-semibold">Voting phase</span> - where
+              players vote on who they want out of the game.
+            </p>
+            <p>
+              If all the mafia members are eliminated, the Towns win! Otherwise,
+              if there are more mafia than there are towns, towns lose!
+            </p>
+          </div>
+        </div>
       </div>
-      <div className=" h-[16px] text-red-500">{errorMessage}</div>
-
+      <footer className="w-full mb-5">
+        <a href="https://github.com/renchiey/mafia-game-online" target="_blank">
+          <div className="flex justify-center items-center gap-2">
+            <p>View source code</p>
+            <FaGithub size={20} />
+          </div>
+        </a>
+      </footer>
       <Modal
         show={showDisconnectModal}
         closeModal={() => setShowDisconnectModal(false)}
@@ -141,6 +175,6 @@ export function Landing({ roomId }: LandingProps) {
           <div className=" text-green-600 ">Connected to server.</div>
         </PopupMessage>
       )}
-    </div>
+    </>
   );
 }

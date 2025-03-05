@@ -57,7 +57,4 @@ To run the Websocket server image:
 2. Run the command `docker run -p [PORT YOU WANT TO USE]:8080 mafia-server`
 
 
-## Future implementations
-- [Not started] Refactor game related components (some currently require too many props to be passed down)
-- [Not started] AI generated night outcome message
-- [Not started] Refactor player storage on server-side 
+

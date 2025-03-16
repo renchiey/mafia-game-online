@@ -61,7 +61,7 @@ export function Lobby({
     setCopyFeedback("Invite link copied!");
 
     navigator.clipboard
-      .writeText(`${url}?${roomId}`)
+      .writeText(`https://${url}?${roomId}`)
       .then(() => setCopyFeedback("Invite link copied!"))
       .catch(() => setCopyFeedback("Failed to copy link."));
 

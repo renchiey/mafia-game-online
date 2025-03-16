@@ -30,12 +30,12 @@ function App() {
   return (
     <div className="h-screen flex flex-col ">
       <div className=" w-full py-10 flex justify-center">
-        <div
+        <h1
           className="text-4xl font-semibold cursor-pointer"
           onClick={() => (window.location.href = import.meta.env.BASE_URL)}
         >
           Mafia Card Game
-        </div>
+        </h1>
       </div>
       {view}
     </div>

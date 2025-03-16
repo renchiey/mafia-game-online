@@ -14,6 +14,7 @@ import {
   SettingsOptions,
   MessageType,
 } from "../shared/types";
+import { getCurrentTime } from "../utils/helper";
 import { getClientRoomId, removeClientFromRoom } from "./socketHandlers";
 
 const rooms = new Map<string, Room>();
@@ -88,7 +89,9 @@ export function generateEmptyRoom(host: Player) {
   };
 
   rooms.set(roomId, room);
-  console.log(`[SERVER EVENT] Room ${roomId} has been created`);
+  console.log(
+    `[${getCurrentTime()}] SERVER EVENT. Room ${roomId} has been created`
+  );
   return roomId;
 }
 
@@ -123,7 +126,9 @@ export function removePlayer(clientId: string, roomId: string) {
   // closing room
   if (room.players.length == 0) {
     rooms.delete(roomId);
-    console.log(`[SERVER EVENT] Room ${roomId} has closed.`);
+    console.log(
+      `[${getCurrentTime()}] SERVER EVENT. Room ${roomId} has closed.`
+    );
     return;
   }
 
@@ -422,8 +427,6 @@ export function handleAction(
   roomId: string,
   action: GameMessageData
 ): [string, string[]] {
-  console.log(`Client ${clientId} doing: ${action.type}`);
-
   const room = rooms.get(roomId) as Room;
 
   const gameState = room.gameState;
@@ -597,8 +600,6 @@ export function processNightOutcome(roomId: string) {
 
     // if target was swapped, set target to swapped player
     if (actions.transported) {
-      console.log(`target ${target}`);
-      console.log(`transported ${actions.transported}`);
       actions.transported.forEach((t) => {
         const swapped = t[0];
 

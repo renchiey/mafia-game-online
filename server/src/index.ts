@@ -41,11 +41,6 @@ wss.on("connection", (ws) => {
 
       if (!msg.type) throw new Error("Invalid message received.");
 
-      // console.log(
-      //   `[CLIENT MSG]: client ${clientId} sent a message of type: ${msg.type}`
-      // );
-      // console.log(msg);
-
       switch (msg.type) {
         case MessageType.SET_NAME:
           handleSetName(clientId, msg);

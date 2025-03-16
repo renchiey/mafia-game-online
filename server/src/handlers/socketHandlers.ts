@@ -29,7 +29,7 @@ import {
 } from "./gameHandlers";
 import { ROLES } from "../utils/roles";
 import { instanceOfRole } from "../utils/typeCheck";
-import { removeItem } from "../utils/helper";
+import { getCurrentTime, removeItem } from "../utils/helper";
 
 const clients = new Map<string, Client>();
 
@@ -43,13 +43,15 @@ export function onConnection(clientId: string, ws: WebSocket) {
     type: MessageType.CONNECTED,
     data: "",
   });
-  console.log(`[SERVER EVENT] Client connected with ID: ${clientId}`);
+  console.log(
+    `[${getCurrentTime()}] SERVER EVENT. Client connected with ID ${clientId}`
+  );
 }
 
 export function handleSetName(clientId: string, message: Message) {
   const roomId = clients.get(clientId)?.roomId;
   if (!roomId) {
-    console.log("[SERVER ERROR] Client is not in a room.");
+    console.log(`[${getCurrentTime()}] SERVER ERROR. Client is not in a room.`);
     return;
   }
 
@@ -146,7 +148,9 @@ export function handleJoinRoom(
 
     ws.send(JSON.stringify({ type: MessageType.JOINED_ROOM, data: roomId }));
 
-    console.log(`[SERVER EVENT] Client ${clientId} has joined a room.`);
+    console.log(
+      `[${getCurrentTime()}]: ROOM EVENT. Client ${clientId} has joined a room.`
+    );
 
     // broadcast new state to room
     broadcastStateToRoom(roomId);
@@ -220,14 +224,18 @@ export function handleClose(clientId: string) {
 
   clients.delete(clientId);
 
-  console.log(`[SERVER EVENT] Client ${clientId} has disconnected.`);
+  console.log(
+    `[${getCurrentTime()}] ROOM EVENT. Client ${clientId} has disconnected.`
+  );
 }
 
 export function handleGet(clientId: string, ws: WebSocket, message: Message) {
   const roomId = clients.get(clientId)?.roomId;
 
   if (!roomId) {
-    console.log(`[SERVER ERR] Client ${clientId} not in room.`);
+    console.log(
+      `[${getCurrentTime()}] SERVER ERROR. Client ${clientId} not in room.`
+    );
     return;
   }
 
@@ -265,7 +273,7 @@ export function handleGet(clientId: string, ws: WebSocket, message: Message) {
 export function handleAddRole(clientId: string, message: Message) {
   if (!instanceOfRole(message.data)) {
     console.log(
-      "[SERVER ERR]: Sent role format does not match role format on server."
+      `[${getCurrentTime()}] SERVER ERROR. Sent role format does not match role format on server.`
     );
 
     return;
@@ -278,14 +286,18 @@ export function handleAddRole(clientId: string, message: Message) {
 
 export function handleRemoveRole(clientId: string, message: Message) {
   if (typeof message.data !== "number") {
-    console.log("[SERVER ERR]: Sent data is not a number.");
+    console.log(
+      `[${getCurrentTime()}] SERVER ERROR. Sent data is not a number.`
+    );
     return;
   }
 
   const roomId = clients.get(clientId)?.roomId as string;
 
   if (!removeRole(roomId, message.data)) {
-    console.log(`[SERVER ERR]: index ${message.data} is invalid`);
+    console.log(
+      `[${getCurrentTime()}] SERVER ERROR. index ${message.data} is invalid`
+    );
   }
 
   broadcastStateToRoom(roomId);
@@ -490,7 +502,9 @@ export function handleGameEvent(clientId: string, message: Message) {
         room.gameState.endTurn = new Set();
         const next = nextPhase(roomId);
 
-        console.log(`[GAME EVENT] Going to next phase ${next}`);
+        console.log(
+          `[${getCurrentTime()}] GAME EVENT. Going to next phase ${next}`
+        );
 
         setTimeout(() => broadcastStateToRoom(roomId), 1500);
 

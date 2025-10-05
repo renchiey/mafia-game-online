@@ -5,9 +5,7 @@
 ## How to play
 1. To start playing, hit create play or join game. (To join a game you must receive an invite link from somemone already in a room)
 
-| landing |
-| --- |
-| ![landing page](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/landing-page.png "landing page") |
+ ![landing page](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/landing-page.png "landing page") 
 
 3. After hitting one of the two buttons you'll end up in a lobby!
 
@@ -50,11 +48,11 @@ You can also use the prebuilt images linked to this repository.
 
 To run the client web server image:
 1. pull the docker image
-2. Run the command `docker run -p [PORT YOU WANT TO USE]:3000 mafia-client`
+2. Run the command `docker run -p [PORT]:3000 mafia-client`
 
 To run the Websocket server image:
 1. pull the docker image
-2. Run the command `docker run -p [PORT YOU WANT TO USE]:8080 mafia-server`
+2. Run the command `docker run -p [PORT]:8080 mafia-server`
 
 
 

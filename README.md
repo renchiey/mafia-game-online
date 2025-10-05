@@ -5,7 +5,9 @@
 ## How to play
 1. To start playing, hit create play or join game. (To join a game you must receive an invite link from somemone already in a room)
 
- ![landing page](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/landing-page.png "landing page") 
+| **landing** |
+| --- |
+|  ![landing page](https://github.com/CrazyBuff/mafia-game-online/blob/main/images/landing-page.png "landing page")  |
 
 3. After hitting one of the two buttons you'll end up in a lobby!
 
